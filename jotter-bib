@@ -1,0 +1,41 @@
+#!/bin/sh
+
+if test "$1" = "-h" || test "$1" = "--help"; then
+cat <<EOF
+Usage: jotter-bib
+
+Extract all bibtex fields from markdown files
+EOF
+exit 0
+fi
+
+while true; do
+    if test -d .jotter; then
+        break
+    elif test "$(pwd)" = "/"; then
+        echo "No jotter root found!" >&2
+        exit 1
+    else
+        cd ..
+    fi
+done
+
+cat <<EOF
+% Composite Bibliography
+% Jotter
+% $(date -R)
+
+EOF
+
+fd -e md | while read filename; do
+    cat "$filename" | awk '
+        /^---$/ && yaml == 0        { yaml = 1; next }
+        /^---$/ && yaml == 1        { yaml = 0; next }
+        /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
+        /^bibtex:/ && yaml == 1     { bibtex = 1; next }
+        /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
+
+        yaml && bibtex              { print }
+        END                         { print "\n" }
+    '
+done | sed 's,^    ,,g'

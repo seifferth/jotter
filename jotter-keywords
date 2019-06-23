@@ -1,0 +1,44 @@
+#!/bin/sh
+
+while test "$1"; do
+    if test "$1" = "-h" || test "$1" = "--help"; then
+    cat <<EOF
+Usage: jotter-keywords [OPTION]
+
+Show all keywords used in this jotter
+
+Options:
+    -c  --count     Show keyword counts
+    -f  --files     Show associated files
+EOF
+    exit 0
+    elif test "$1" = "-c" || test "$1" = "--count"; then
+        uniq_opts="-c"
+    elif test "$1" = "-f" || test "$1" = "--files"; then
+        files=1
+    fi
+    shift
+done
+
+while true; do
+    if test -d .jotter; then
+        break
+    elif test "$(pwd)" = "/"; then
+        echo "No jotter root found!" >&2
+        exit 1
+    else
+        cd ..
+    fi
+done
+
+tmp="$(mktemp)"
+printf '$for(keywords)$$keywords$' > "$tmp"
+test "$files" = 1 && printf ': $filename$' >> "$tmp"
+printf '$sep$\n$endfor$\n' >> "$tmp"
+
+fd -e md | while read filename; do
+    pandoc -t plain --template "$tmp" \
+           -M filename="$filename" "$filename"
+done | sort | uniq $uniq_opts
+
+rm "$tmp"
