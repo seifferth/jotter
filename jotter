@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if test "$(which jotter-$1 2>/dev/null)"; then
+    jotter-$@
+else
+    echo "Command not found: jotter-$1" >&2
+    exit 1
+fi
