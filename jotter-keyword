@@ -8,12 +8,13 @@ Usage: jotter-keyword [OPTIONS] [KEYWORD]
 Show all files associated with a specific keyword
 
 Options:
-    -c  --count     Show keyword counts (only works with -l)
+    -c  --count     Show keyword counts (implies --list)
     -l  --list      List all keywords used in this jotter
 EOF
     exit 0
     elif test "$1" = "-c" || test "$1" = "--count"; then
         uniq_opts="-c"
+        list=1
     elif test "$1" = "-l" || test "$1" = "--list"; then
         list=1
     else
