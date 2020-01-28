@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import shutil
+import yaml
+import re
+import pypandoc
+
+
+def find_jotter_root():
+    d = os.getcwd()
+    while d != "/":
+        if os.path.isdir(os.path.join(d, ".jotter")):
+            return d
+        else:
+            d = os.path.split(d)[0]
+    raise Exception(
+        "No jotter root found. Run jotter-init to create a new jotter."
+    )
+
+
+def clean_dir(path):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    os.mkdir(path)
+
+
+def get_files(path):
+    for d, _, fs in os.walk(path):
+        if d.endswith(".jotter"):
+            continue
+        for f in fs:
+            if f.endswith(".md"):
+                yield os.path.join(d, f)
+
+def extract_yaml(filename) -> dict:
+    regex = r'\n\n---+\n' + \
+            r'(\w*([^\n\w](.|\n)*?[^\n\w]|[^\n\w])\w*\n)' + \
+            r'(---+|\.\.\.+)\n\n'
+    below_empty = True
+    with open(filename) as f:
+        parts = map(
+            lambda x: x[0],
+            re.findall(regex, "\n\n"+f.read()+"\n\n")
+        )
+    return yaml.safe_load("\n\n".join(parts)) or dict()
+
+def enrich_metadata(meta: dict) -> None:
+    """
+    Note that the meta dict is updated in-place.
+    """
+    if "bibtex" in meta.keys():
+        entries = re.findall(
+            r'@(.*?)\{(.*?),',
+            meta["bibtex"]
+        )
+        meta["_citekeys"] = map(lambda x: x[1], entries)
+        this = list(map(
+            lambda x: x[1],
+            filter(lambda x: x[0].lower() != "collection", entries)
+        ))
+        if len(this) == 1: meta["_this"] = this[0]
+    # TODO: Set title if none set yet
+
+def get_metadata(filename, jotter_root="") -> dict:
+    meta = extract_yaml(filename)
+    meta["_filename"] = re.sub(
+        r'^{}{}?'.format(jotter_root, os.sep), '', filename
+    )
+    meta["_full_filename"] = filename
+    meta["_html_filename"] = re.sub(os.sep, ".", meta["_filename"][:-3])+".html"
+    enrich_metadata(meta)
+    return meta
+
+def warn(msg, files):
+    """
+    msg:    Message to be displayed on stdout (string)
+    files:  Files affected (either string or list of strings)
+    """
+    print(msg, file=sys.stderr)
+    if type(files) == str:
+        files = [files]
+    for filename in files:
+        print("    " + filename, file=sys.stderr)
+
+def survey(path):
+    """
+    Find the markdown files in this jotter and obtain some information
+    about them.
+
+    Return values:
+      - files:          A list of full filenames of content files
+      - metadata:       A dict, papping full filenames to metadata dicts.
+                        `metadata[filename]` gives the metadata for a
+                        given filename.
+      - citekey_map:    A dict mapping citekeys to _html_filename
+      - keyword_map:    A dict mapping keywords to _html_filename
+    """
+    files = list(get_files(jotter_root))
+    metadata = dict()
+    citekey_map = dict()
+    keyword_map = dict()
+    for filename in files:
+        meta = get_metadata(filename, jotter_root=jotter_root)
+        metadata[filename] = meta
+        if "_citekeys" in meta.keys():
+            for key in meta["_citekeys"]:
+                if key in citekey_map.keys():
+                    warn(
+                        "Duplicate citekey_map \"{}\"".format(key),
+                        [citekey_map[key], meta["_filename"]]
+                    )
+                citekey_map[key] = meta["_html_filename"]
+        if "keywords" in meta.keys():
+            try:
+                for keyword in meta["keywords"]:
+                    if keyword not in keyword_map.keys():
+                        keyword_map[keyword] = list()
+                    keyword_map[keyword].append(meta["_html_filename"])
+            except:
+                warn("Could not process keywords in file:", meta["_filename"])
+    return (files, metadata, citekey_map, keyword_map)
+
+def create_index(files, metadata, citekey_map, keyword_map):
+    """
+    Return:     A string containing markdown content that is
+                ready to be converted to html by pandoc.
+    """
+    index = list()
+    index.append("---\ntitle: Jotter Index\n...")
+    index.append("\n\n\n# Notes\n\n\n")
+    l = list()
+    for meta in metadata.values():
+        if "bibtex" not in meta.keys(): # I. e. this is a note, not a summary
+            if "title" in meta.keys():
+                title = meta["title"]
+            else:
+                title = "Untitled ({})".format(meta["_filename"])
+            l.append("- [{}]({})\n".format(title, meta["_html_filename"]))
+    l.sort(key=lambda x: x.lower())
+    index.extend(l)
+    index.append("\n\n\n# Citekeys\n\n\n")
+    l = list()
+    for key, val in citekey_map.items():
+        l.append("- [{}]({})\n".format(key, val))
+    l.sort(key=lambda x: x.lower())
+    index.extend(l)
+    index.append("\n\n\n# Files\n\n\n")
+    l = list()
+    for meta in metadata.values():
+        l.append("- [{}]({})\n".format(
+            meta["_filename"],
+            meta["_html_filename"],
+        ))
+    l.sort(key=lambda x: x.lower())
+    index.extend(l)
+    index.append("\n\n\n# Keywords\n\n\n")
+    keywords = list(keyword_map.keys())
+    keywords.sort(key=lambda x: x.lower())
+    for k in keywords:
+        index.append("- {}\n".format(k))
+        keyword_map[k].sort(key=lambda x: x.lower())
+        index.extend(map(
+            lambda x: "    - [{}]({})\n".format(x, x),
+            keyword_map[k]
+        ))
+    return "".join(index)
+
+def produce_html(content, outputfile, meta=None):
+    pypandoc.convert_text(
+        source=content,
+        format="markdown",
+        to="html",
+        outputfile=outputfile
+    )
+
+
+if __name__ == "__main__":
+    jotter_root = find_jotter_root()
+    html_root = os.path.join(jotter_root, ".jotter", "static")
+    clean_dir(html_root)
+
+    files, metadata, citekey_map, keyword_map = survey(jotter_root)
+
+    print("\rCreating index ...\r", end="")
+    produce_html(
+        content=create_index(files, metadata, citekey_map, keyword_map),
+        outputfile=os.path.join(html_root, "index.html")
+    )
+
+    for filename in files:
+        shorthand = metadata[filename]["_filename"]
+        if len(shorthand) > 43:
+            shorthand = shorthand[:6] + ".." + shorthand[-35:]
+        fill = (43-len(shorthand)) * " "
+        print(
+            "\rConverting {} ...{}\r".format(shorthand, fill),
+            end=""
+        )
+        outputfile = os.path.join(
+            html_root,
+            metadata[filename]["_html_filename"]
+        )
+        with open(filename) as f:
+            produce_html(
+                content=f.read(),
+                outputfile=outputfile,
+                meta=metadata[filename]
+            )
+
+    print("\rSuccessfully created static version in {}".format(html_root))

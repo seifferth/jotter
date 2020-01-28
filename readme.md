@@ -12,6 +12,8 @@ server of your choice.
 - POSIX-compliant shell scripting environment
 - [pandoc](https://pandoc.org)
 - [fd-find](https://github.com/sharkdp/fd)
+- [pyyaml](https://pyyaml.org) for `jotter-html`
+- [pypandoc](https://github.com/bebraw/pypandoc) for `jotter-html`
 
 ## Installing
 
@@ -101,3 +103,26 @@ them in a single file.
 jotter-keyword
 : Interact with keywords specified throughout the wiki.
 See `jotter-keyword -h` for further information.
+
+jotter-html
+: Produce a static website of this jotter in the `.jotter` directory.
+
+
+## Limitations
+
+- All content files must contain an `.md`-Extension. Files with different
+  extensions will be ignored.
+- Keys in yaml-blocks must not start with an underscore (`_`).
+  Keywords starting with an underscore are reserved for internal use
+  by `jotter-html` and their use may therefore produce unpredictable
+  results.
+- `jotter-html` currently produces a flat directory structure in
+  `.jotter/static/`. This makes linking files together way easier.
+  It also means that filenames have to be changed so they don't include
+  directory separators. This is accomplished in a way similar to the one
+  used in python libraries, by using `.` as a separator substitute. As a
+  consequence, the files `a/b` and `a.b` look the same to `jotter-html`.
+  As of now, it is the user's responsibility to avoid such naming
+  conflicts.
+- Some filenames are furthermore reserved for use by `jotter-html`:
+    - index
