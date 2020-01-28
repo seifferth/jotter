@@ -250,26 +250,30 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
     cite_frame = r'<span class="citation" data-cites="{}">{}</span>'
     regex = cite_frame.format(r'(.+?)', r'(.+?)')
 
+    def replace(html, key, ref, link=None):
+        if link != None:
+            html = html.replace(
+                cite_frame.format(key, ref),
+                r'<a href="{}">{}</a>'.format(link, ref),
+            )
+        else:
+            html = html.replace(cite_frame.format(key, ref), ref)
+        return html.replace("--", "–")
+
     unk = set()
     for key, ref in re.findall(regex, html):
         if key[:4] in ["sec:", "fig:", "tbl:"]:
-            html = html.replace(
-                cite_frame.format(key, ref),
-                r'<a href="#{}">{}</a>'.format(key, ref)
-            )
+            html = replace(html, key, ref, link="#"+key)
         elif key in citekey_map.keys():
             if citekey_map[key] != doc:
-                html = html.replace(
-                    cite_frame.format(key, ref),
-                    r'<a href="{}">{}</a>'.format(
-                        citekey_map[key]["_html_filename"],
-                        ref,
-                    ),
+                html = replace(
+                    html, key, ref,
+                    link=citekey_map[key]["_html_filename"]
                 )
             else:
-                html = html.replace(cite_frame.format(key, ref), ref)
+                html = replace(html, key, ref)
         else:
-            html = html.replace(cite_frame.format(key, ref), ref)
+            html = replace(html, key, ref)
             if key not in ["this", "unknown"]:
                 unk.add(key)
     if unk:
