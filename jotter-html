@@ -19,59 +19,10 @@ def find_jotter_root():
         "No jotter root found. Run jotter-init to create a new jotter."
     )
 
-
 def clean_dir(path):
     if os.path.isdir(path):
         shutil.rmtree(path)
     os.mkdir(path)
-
-
-def get_files(path):
-    for d, _, fs in os.walk(path):
-        if d.endswith(".jotter"):
-            continue
-        for f in fs:
-            if f.endswith(".md"):
-                yield os.path.join(d, f)
-
-def extract_yaml(filename) -> dict:
-    regex = r'\n\n---+\n' + \
-            r'(\w*([^\n\w](.|\n)*?[^\n\w]|[^\n\w])\w*\n)' + \
-            r'(---+|\.\.\.+)\n\n'
-    below_empty = True
-    with open(filename) as f:
-        parts = map(
-            lambda x: x[0],
-            re.findall(regex, "\n\n"+f.read()+"\n\n")
-        )
-    return yaml.safe_load("\n\n".join(parts)) or dict()
-
-def enrich_metadata(meta: dict) -> None:
-    """
-    Note that the meta dict is updated in-place.
-    """
-    if "bibtex" in meta.keys():
-        entries = re.findall(
-            r'@(.*?)\{(.*?),',
-            meta["bibtex"]
-        )
-        meta["_citekeys"] = map(lambda x: x[1], entries)
-        this = list(map(
-            lambda x: x[1],
-            filter(lambda x: x[0].lower() != "collection", entries)
-        ))
-        if len(this) == 1: meta["_this"] = this[0]
-    # TODO: Set title if none set yet
-
-def get_metadata(filename, jotter_root="") -> dict:
-    meta = extract_yaml(filename)
-    meta["_filename"] = re.sub(
-        r'^{}{}?'.format(jotter_root, os.sep), '', filename
-    )
-    meta["_full_filename"] = filename
-    meta["_html_filename"] = re.sub(os.sep, ".", meta["_filename"][:-3])+".html"
-    enrich_metadata(meta)
-    return meta
 
 def warn(msg, files):
     """
@@ -97,6 +48,53 @@ def survey(path):
       - citekey_map:    A dict mapping citekeys to _html_filename
       - keyword_map:    A dict mapping keywords to _html_filename
     """
+    def get_files(path):
+        for d, _, fs in os.walk(path):
+            if d.endswith(".jotter"):
+                continue
+            for f in fs:
+                if f.endswith(".md"):
+                    yield os.path.join(d, f)
+
+    def extract_yaml(filename) -> dict:
+        regex = r'\n\n---+\n' + \
+                r'(\w*([^\n\w](.|\n)*?[^\n\w]|[^\n\w])\w*\n)' + \
+                r'(---+|\.\.\.+)\n\n'
+        below_empty = True
+        with open(filename) as f:
+            parts = map(
+                lambda x: x[0],
+                re.findall(regex, "\n\n"+f.read()+"\n\n")
+            )
+        return yaml.safe_load("\n\n".join(parts)) or dict()
+
+    def enrich_metadata(meta: dict) -> None:
+        """
+        Note that the meta dict is updated in-place.
+        """
+        if "bibtex" in meta.keys():
+            entries = re.findall(
+                r'@(.*?)\{(.*?),',
+                meta["bibtex"]
+            )
+            meta["_citekeys"] = map(lambda x: x[1], entries)
+            this = list(map(
+                lambda x: x[1],
+                filter(lambda x: x[0].lower() != "collection", entries)
+            ))
+            if len(this) == 1: meta["_this"] = this[0]
+        # TODO: Set title if none set yet
+
+    def get_metadata(filename, jotter_root="") -> dict:
+        meta = extract_yaml(filename)
+        meta["_filename"] = re.sub(
+            r'^{}{}?'.format(jotter_root, os.sep), '', filename
+        )
+        meta["_full_filename"] = filename
+        meta["_html_filename"] = re.sub(os.sep, ".", meta["_filename"][:-3])+".html"
+        enrich_metadata(meta)
+        return meta
+
     files = list(get_files(jotter_root))
     metadata = dict()
     citekey_map = dict()
