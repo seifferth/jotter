@@ -216,10 +216,13 @@ def create_index(filename_map, citekey_map, keyword_map):
     return "".join(index)
 
 def produce_html(content, outputfile, meta=None):
+    # TODO: This css stuff currently breaks everything :p
+    pandoc_args = ["-s"]
     pypandoc.convert_text(
         source=content,
         format="markdown",
         to="html",
+        extra_args=pandoc_args,
         outputfile=outputfile
     )
 
