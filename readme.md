@@ -129,10 +129,11 @@ jotter-html
 - The following citekeys have special meanings for jotter:
     - `@this`: Refers to the reference specified in the `bibtex` metadata
       entry in the same file. `@this` must not be used if the `bibtex`
-      entry contains more than one reference. One exception to this
-      rule are `bibtex` entries containing both a `collection` and one
-      `incollection` entry, for which `@this` is interpreted to refer
-      to the `incollection` entry.
+      entry contains more than one reference. (You can still use the
+      citekey of a specific entry you want to refer to in this case.)
+      One exception to this rule are `bibtex` entries containing both
+      a `collection` and one `incollection` entry, for which `@this`
+      is interpreted to refer to the `incollection` entry.
     - `@unknown`: Refers to a reference that has not been added to the
       jotter yet, but will be added in the future. This citekey is
       currently mostly reserved for future use and thus simply ignored
