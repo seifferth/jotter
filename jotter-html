@@ -252,7 +252,12 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
 
     unk = set()
     for key, ref in re.findall(regex, html):
-        if key in citekey_map.keys():
+        if key[:4] in ["sec:", "fig:", "tbl:"]:
+            html = html.replace(
+                cite_frame.format(key, ref),
+                r'<a href="#{}">{}</a>'.format(key, ref)
+            )
+        elif key in citekey_map.keys():
             if citekey_map[key] != doc:
                 html = html.replace(
                     cite_frame.format(key, ref),
