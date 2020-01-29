@@ -99,7 +99,7 @@ def survey(jotter_root: str, full_content: bool=True):
 
     def extract_yaml(content: str) -> dict:
         regex = r'\n\n---+\n' + \
-                r'(\w*([^\n\w](.|\n)*?[^\n\w]|[^\n\w])\w*\n)' + \
+                r'([ \t]*(\S(.|\n)*?\S|\S)[ \t]*\n)' + \
                 r'(---+|\.\.\.+)\n\n'
         parts = map(
             lambda x: x[0],
