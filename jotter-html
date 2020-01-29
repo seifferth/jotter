@@ -248,34 +248,39 @@ def produce_html(doc, html_root, citekey_map=None):
 
 def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
     cite_frame = r'<span class="citation" data-cites="{}">{}</span>'
-    regex = cite_frame.format(r'(.+?)', r'(.+?)')
+    regex = cite_frame.format(r'(.+?)', r'.+?')
 
-    def replace(html, key, ref, link=None):
+    def replace(html, key, link=None):
         if link != None:
-            html = html.replace(
-                cite_frame.format(key, ref),
-                r'<a href="{}">{}</a>'.format(link, ref),
+            html = re.sub(
+                cite_frame.format(key, r'(.+?)'),
+                r'<a href="{}">\1</a>'.format(link),
+                html,
             )
         else:
-            html = html.replace(cite_frame.format(key, ref), ref)
+            html = re.sub(
+                cite_frame.format(key, r'(.+?)'),
+                r'\1',
+                html
+            )
         return html.replace("--", "–")
 
     unk = set()
-    for key, ref in re.findall(regex, html):
+    for key in set(re.findall(regex, html)):
         if key[:4] in ["sec:", "fig:", "tbl:"]:
-            html = replace(html, key, ref, link="#"+key)
+            html = replace(html, key, link="#"+key)
         elif key in ["this", "unknown"]:
-            html = replace(html, key, ref)
+            html = replace(html, key)
         elif key in citekey_map.keys():
             if citekey_map[key] != doc:
                 html = replace(
-                    html, key, ref,
+                    html, key,
                     link=citekey_map[key]["_html_filename"]
                 )
             else:
-                html = replace(html, key, ref)
+                html = replace(html, key)
         else:
-            html = replace(html, key, ref)
+            html = replace(html, key)
             unk.add(key)
     if unk:
         print(
