@@ -264,6 +264,8 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
     for key, ref in re.findall(regex, html):
         if key[:4] in ["sec:", "fig:", "tbl:"]:
             html = replace(html, key, ref, link="#"+key)
+        elif key in ["this", "unknown"]:
+            html = replace(html, key, ref)
         elif key in citekey_map.keys():
             if citekey_map[key] != doc:
                 html = replace(
@@ -274,8 +276,7 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
                 html = replace(html, key, ref)
         else:
             html = replace(html, key, ref)
-            if key not in ["this", "unknown"]:
-                unk.add(key)
+            unk.add(key)
     if unk:
         print(
             "Unknown citekeys in {}".format(doc["_filename"]),
