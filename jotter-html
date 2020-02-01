@@ -157,8 +157,8 @@ def survey(jotter_root: str, full_content: bool=True):
             for key in doc["_citekeys"]:
                 if key in citekey_map.keys():
                     warn(
-                        "Duplicate citekey_map \"{}\"".format(key),
-                        [citekey_map[key], doc["_filename"]]
+                        "Duplicate citekey \"{}\"".format(key),
+                        [citekey_map[key]["_filename"], doc["_filename"]]
                     )
                 citekey_map[key] = doc
         if "keywords" in doc.keys():
