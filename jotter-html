@@ -303,7 +303,8 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
 if __name__ == "__main__":
     jotter_root = find_jotter_root()
     html_root = os.path.join(jotter_root, ".jotter", "static")
-    clean_dir(html_root)
+    if len(sys.argv) > 1 and sys.argv[1] in ["-c", "--clean"]:
+        clean_dir(html_root)
 
     filename_map, citekey_map, keyword_map = survey(jotter_root)
 
@@ -315,6 +316,16 @@ if __name__ == "__main__":
     }
     produce_html(index, html_root)
 
+    def needs_update(doc, html_root=html_root):
+        html_filename = os.path.join(html_root, doc["_html_filename"])
+        if not os.path.isfile(html_filename):
+            return True
+        md_time = os.path.getmtime(doc["_full_filename"])
+        html_time = os.path.getmtime(html_filename)
+        if md_time > html_time:
+            return True
+        return False
+
     for filename, doc in filename_map.items():
         shorthand = filename
         if len(shorthand) > 43:
@@ -324,6 +335,7 @@ if __name__ == "__main__":
             "\rConverting {} ...{}\r".format(shorthand, fill),
             end=""
         )
-        produce_html(doc, html_root, citekey_map=citekey_map)
+        if needs_update(doc, html_root=html_root):
+            produce_html(doc, html_root, citekey_map=citekey_map)
 
     print("\rSuccessfully created static version in {}".format(html_root))
