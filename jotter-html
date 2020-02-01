@@ -112,6 +112,7 @@ def survey(jotter_root: str, full_content: bool=True):
         Note that the document dict is updated in-place.
         """
         if "bibtex" in doc.keys():
+            doc["type"] = "excerpt"
             entries = re.findall(
                 r'@(.*?)\{(.*?),',
                 doc["bibtex"]
@@ -122,11 +123,16 @@ def survey(jotter_root: str, full_content: bool=True):
                 filter(lambda x: x[0].lower() != "collection", entries)
             ))
             if len(this) == 1: doc["_this"] = this[0]
+        else:
+            if "type" not in doc.keys():
+                doc["type"] = "note"
+            this = "{}:{}".format(doc["type"], doc["_short_filename"])
+            doc["_citekeys"] = [this]
         if "title" not in doc.keys():
             if "_this" in doc.keys():
                 doc["title"] = doc["_this"]
             else:
-                doc["title"] = "Untitled ({})".format(doc["_filename"])
+                doc["title"] = doc["_short_filename"]+".md"
 
     def parse_doc(filename, jotter_root="", full_content=True) -> dict:
         with open(filename) as f:
@@ -137,6 +143,7 @@ def survey(jotter_root: str, full_content: bool=True):
         doc["_filename"] = re.sub(
             r'^{}{}?'.format(jotter_root, os.sep), '', filename
         )
+        doc["_short_filename"] = os.path.split(filename)[1][:-3]
         doc["_full_filename"] = filename
         doc["_html_filename"] = re.sub(os.sep, ".", doc["_filename"][:-3])+".html"
         enrich_metadata(doc)
