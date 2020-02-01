@@ -194,7 +194,8 @@ def create_index(filename_map, citekey_map, keyword_map):
     index.append("\n\n\n# Citekeys\n\n\n")
     l = list()
     for citekey, doc in citekey_map.items():
-        l.append("- [{}]({})\n".format(citekey, doc["_html_filename"]))
+        if doc["type"] == "excerpt":
+            l.append("- [{}]({})\n".format(citekey, doc["_html_filename"]))
     l.sort(key=lambda x: x.lower())
     index.extend(l)
     index.append("\n\n\n# Files\n\n\n")
