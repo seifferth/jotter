@@ -296,3 +296,16 @@ jotter-html
       jotter yet, but will be added in the future. This citekey is
       currently mostly reserved for future use and thus simply ignored
       at the moment.
+
+## Known bugs
+
+- `jotter-bib` still uses some slightly flawed heuristics for locating
+  metadata blocks in markdown files. Although I didn't test it, I
+  would expect `jotter-bib` to produce faulty results (including broken
+  bibtex syntax) if the string `\n\n---\n\n` is used as a horizontal
+  rule anywhere in a markdown file. This bug should be automatically
+  fixed once `jotter-bib` is rewritten in python.
+- The metedata extraction function (`survey`) from `jotter.py` doesn't
+  account for code blocks or html comments. Metadata extraction could thus
+  be broken by crafting (or inadvertently writing) code blocks or comments
+  which contain content that looks like the beginning of a metadata block.
