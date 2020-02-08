@@ -27,6 +27,7 @@ cat <<EOF
 
 EOF
 
+fd -e bib | xargs cat
 fd -e md | while read filename; do
     cat "$filename" | awk '
         /^---$/ && yaml == 0        { yaml = 1; next }

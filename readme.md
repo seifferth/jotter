@@ -85,6 +85,21 @@ bibtex: |
 ---
 ```
 
+Additionally, you can also include plain bibtex files in your jotter,
+using `.bib` as the filename extension. `jotter-bib` will combine all
+entries found in these plain bibtex files with the ones specified in
+metadata blocks.
+
+This functionality can come in handy when including bibliographic
+information that is not directly associated with any note. If you use
+both *collection* and *incollection* entries, for instance, you may wish
+to take notes for the individual *incollection* entries while there
+might not no need write any notes on the entire collection. If this
+is the case, you could simply specify the bibliographic information of
+the *collection* using a plain bibtex file, which would be considered
+whenever jotter extracts bibliographic information, but which would not
+show up in your notes.
+
 ## Commands
 
 jotter
