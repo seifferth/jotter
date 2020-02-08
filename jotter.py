@@ -110,12 +110,8 @@ def survey(jotter_root: str, full_content: bool=True):
                 r'@(.*?)\{(.*?),',
                 doc["bibtex"]
             )
-            doc["_citekeys"] = map(lambda x: x[1], entries)
-            this = list(map(
-                lambda x: x[1],
-                filter(lambda x: x[0].lower() != "collection", entries)
-            ))
-            if len(this) == 1: doc["_this"] = this[0]
+            doc["_citekeys"] = list(map(lambda x: x[1], entries))
+            if len(doc["_citekeys"]) == 1: doc["_this"] = doc["_citekeys"][0]
         else:
             if "type" not in doc.keys():
                 doc["type"] = "note"
