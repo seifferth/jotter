@@ -113,7 +113,7 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
 
     unk = set()
     for key in set(re.findall(regex, html)):
-        if key[:4] in ["sec:", "fig:", "tbl:"]:
+        if key[:4] in ["sec:","fig:","tbl:","lst:"] or key[:3] == "eq:":
             html = replace(html, key, link="#"+key)
         elif key in ["this", "unknown"]:
             html = replace(html, key)
