@@ -19,14 +19,18 @@ def create_index(filename_map, citekey_map, keyword_map):
                 ready to be converted to html by pandoc.
     """
     index = list()
-    index.append("\n\n\n# Notes\n\n\n")
-    l = list()
-    for doc in filename_map.values():
-        if "bibtex" not in doc.keys(): # I. e. this is a note, not a summary
+    note_types = list(set(map(lambda doc: doc["type"], filename_map.values())))
+    note_types.sort()
+    for t in note_types:
+        if t == "excerpt":
+            continue
+        index.append("\n\n\n# {}\n\n\n".format(t.capitalize()))
+        l = list()
+        for doc in filter(lambda doc: doc["type"] == t, filename_map.values()):
             l.append("- [{}]({})\n".format(doc["title"], doc["_html_filename"]))
-    l.sort(key=lambda x: x.lower())
-    index.extend(l)
-    index.append("\n\n\n# Citekeys\n\n\n")
+        l.sort(key=lambda x: x.lower())
+        index.extend(l)
+    index.append("\n\n\n# Excerpt\n\n\n")
     l = list()
     for citekey, doc in citekey_map.items():
         if doc["type"] == "excerpt":
