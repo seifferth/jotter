@@ -99,6 +99,7 @@ def produce_html(doc, html_root, citekey_map=None, internal_links=False):
         f.write(html)
 
 def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
+    label_regex = r'(sec|fig|tbl|lst|eq):[\w:-]+'
     unk = set()
     def report_unk():
         if unk:
@@ -114,7 +115,7 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
 
     def link_postfix(postfix, target):
         return re.sub(
-            r'((sec|fig|tbl|lst|eq):[\w:-]+)',
+            "({})".format(label_regex),
             r'<a href="{}#\1">\1</a>'.format(target),
             postfix,
         )
@@ -122,7 +123,7 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
     def link(key, postfix):
             if not key:
                 return postfix
-            elif key[:4] in ["sec:","fig:","tbl:","lst:"] or key[:3] == "eq:":
+            elif re.match('^'+label_regex, key):
                 key = link_key(key, "#"+key)
             elif key == "this" or citekey_map.get(key) == doc:
                 postfix = link_postfix(postfix, "")
@@ -155,6 +156,9 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
         content = "".join(content).replace("--", "–")
         content = re.sub(r'@(<a href=.*?>)', r'\1@', content)
         citation.replace_with(parse(content))
+
+    for sec in html.find_all(attrs={"id": re.compile(label_regex)}):
+        sec.append(" {#"+sec.get("id")+"}")
 
     report_unk()
     return str(html)
