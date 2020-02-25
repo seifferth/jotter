@@ -265,6 +265,12 @@ See `jotter-keyword -h` for further information.
 jotter-html
 : Produce a static website of this jotter in the `.jotter` directory.
 
+jotter-ctags
+: Create a `tags` file in the jotter's root directory. This file is meant
+to allow users to easily follow internal links between files using their
+text editors. Text editors still needs to handle this file correctly,
+of course.
+
 
 ## Limitations
 
