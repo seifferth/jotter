@@ -25,6 +25,7 @@ further explanation below).
 - [fd-find](https://github.com/sharkdp/fd)
 - [pyyaml](https://pyyaml.org)
 - [pypandoc](https://github.com/bebraw/pypandoc) for `jotter-html`
+- [BeautifulSoup(https://www.crummy.com/software/BeautifulSoup/) for `jotter-html`
 
 ## Installing
 
@@ -210,9 +211,6 @@ to other works, I actually find it quite useful to see the shorthand
 rather than the full-blown citation.
 
 ### Referring to specific sections
-
-**Note: This functionality is not fully implemented yet, but will be
-added shortly.**
 
 It is also possible to use citekey-style linking to refer to specific
 sections within a note. This functionality reuses and slightly extends

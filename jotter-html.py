@@ -5,6 +5,8 @@ import os
 import shutil
 import re
 import pypandoc
+import warnings
+import bs4
 from jotter import find_jotter_root, survey
 
 
@@ -97,50 +99,65 @@ def produce_html(doc, html_root, citekey_map=None, internal_links=False):
         f.write(html)
 
 def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
-    cite_frame = r'<span class="citation" data-cites="{}">{}</span>'
-    regex = cite_frame.format(r'(.+?)', r'.+?')
-
-    def replace(html, key, link=None):
-        if link != None:
-            html = re.sub(
-                cite_frame.format(key, r'(.+?)'),
-                r'<a href="{}">\1</a>'.format(link),
-                html,
-            )
-        else:
-            html = re.sub(
-                cite_frame.format(key, r'(.+?)'),
-                r'\1',
-                html
-            )
-        return html.replace("--", "–")
-
     unk = set()
-    for key in set(re.findall(regex, html)):
-        if key[:4] in ["sec:","fig:","tbl:","lst:"] or key[:3] == "eq:":
-            html = replace(html, key, link="#"+key)
-        elif key in ["this", "unknown"]:
-            html = replace(html, key)
-        elif key in citekey_map.keys():
-            if citekey_map[key] != doc:
-                html = replace(
-                    html, key,
-                    link=citekey_map[key]["_html_filename"]
-                )
-            else:
-                html = replace(html, key)
-        else:
-            html = replace(html, key)
-            unk.add(key)
-    if unk:
-        print(
-            "Unknown citekeys in {}".format(doc["_filename"]),
-            file=sys.stderr
-        )
-        for key in unk:
-            print("  - {}".format(key), file=sys.stderr)
+    def report_unk():
+        if unk:
+            print(
+                "Unknown citekeys in {}".format(doc["_filename"]),
+                file=sys.stderr
+            )
+            for key in unk:
+                print("  - {}".format(key), file=sys.stderr)
 
-    return html
+    def link_key(key, target):
+        return r'<a href="{}">{}</a>'.format(target, key)
+
+    def link_postfix(postfix, target):
+        return re.sub(
+            r'((sec|fig|tbl|lst|eq):[\w:-]+)',
+            r'<a href="{}#\1">\1</a>'.format(target),
+            postfix,
+        )
+
+    def link(key, postfix):
+            if not key:
+                return postfix
+            elif key[:4] in ["sec:","fig:","tbl:","lst:"] or key[:3] == "eq:":
+                key = link_key(key, "#"+key)
+            elif key == "this" or citekey_map.get(key) == doc:
+                postfix = link_postfix(postfix, "")
+            elif key == "unknown":
+                pass
+            elif key in citekey_map.keys():
+                target = citekey_map[key]["_html_filename"]
+                key = link_key(key, target)
+                postfix = link_postfix(postfix, target)
+            else:
+                unk.add(key)
+            return key+postfix
+
+    def parse(html):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(category=UserWarning, action='ignore')
+            return bs4.BeautifulSoup(html)
+
+    html = parse(html)
+    for citation in html.find_all(attrs={"class": "citation"}):
+        text = citation.get_text()
+        content = list()
+        oldkey = ""
+        for key in citation.get("data-cites").split():
+            prefix, text = text.split(key, 1)
+            content.append(link(oldkey, prefix))
+            oldkey = key
+        content.append(link(oldkey, text))
+
+        content = "".join(content).replace("--", "–")
+        content = re.sub(r'@(<a href=.*?>)', r'\1@', content)
+        citation.replace_with(parse(content))
+
+    report_unk()
+    return str(html)
 
 
 if __name__ == "__main__":
