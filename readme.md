@@ -25,7 +25,8 @@ further explanation below).
 - [fd-find](https://github.com/sharkdp/fd)
 - [pyyaml](https://pyyaml.org)
 - [pypandoc](https://github.com/bebraw/pypandoc) for `jotter-html`
-- [BeautifulSoup(https://www.crummy.com/software/BeautifulSoup/) for `jotter-html`
+- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)
+  for `jotter-html`
 
 ## Installing
 
