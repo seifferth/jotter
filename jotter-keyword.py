@@ -24,7 +24,7 @@ if __name__ == "__main__":
             keywords.sort()
             for k in keywords:
                 if "-c" in sys.argv or "--count" in sys.argv:
-                    pad = int(max(map(len, keyword_map.values()))/10)
+                    pad = len(str(max(map(len, keyword_map.values()))))
                     frame = '  {:>'+str(pad)+'}  '
                     print(frame.format(len(keyword_map[k])), end="")
                 print(k)
