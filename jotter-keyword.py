@@ -1,24 +1,37 @@
 #!/usr/bin/env python3
 """Usage: jotter-keyword [OPTIONS] [KEYWORD]
 
-Show all files associated with a specific keyword
+Show all files associated with a specific keyword.
+By default, only files in the current working directory
+or its subdirectories will be considered.
 
 Options:
+    -a  --all       Do not restrict the operation to the
+                    current working directory
     -c  --count     Show keyword counts (implies --list)
     -l  --list      List all keywords used in this jotter
     -h  --help      Print this help message and exit
 """
 
+import os
 import sys
 from jotter import find_jotter_root, survey
 
 if __name__ == "__main__":
+    if "-a" in sys.argv:
+        root = find_jotter_root()
+        sys.argv.remove("-a")
+    elif "--all" in sys.argv:
+        root = find_jotter_root()
+        sys.argv.remove("--all")
+    else:
+        root = os.getcwd()
     if len(sys.argv) == 1:
         print(__doc__, file=sys.stderr); exit(1)
-    elif sys.argv[1] in ["-h","--help"]:
+    elif "-h" in sys.argv or "--help" in sys.argv:
         print(__doc__); exit(0)
     else:
-        _, _, keyword_map = survey(find_jotter_root(), full_content=False)
+        _, _, keyword_map = survey(root, full_content=False)
         if sys.argv[1] in ["-l","--list","-c","--count"]:
             keywords = list(keyword_map.keys())
             keywords.sort()
