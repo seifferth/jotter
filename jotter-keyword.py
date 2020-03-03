@@ -19,13 +19,14 @@ from jotter import find_jotter_root, survey
 
 if __name__ == "__main__":
     if "-a" in sys.argv:
-        root = find_jotter_root()
+        root, rel_filename = find_jotter_root(rel_filename=True)
         sys.argv.remove("-a")
     elif "--all" in sys.argv:
-        root = find_jotter_root()
+        root, rel_filename = find_jotter_root(rel_filename=True)
         sys.argv.remove("--all")
     else:
         root = os.getcwd()
+        rel_filename = lambda x: x
     if len(sys.argv) == 1:
         print(__doc__, file=sys.stderr); exit(1)
     elif "-h" in sys.argv or "--help" in sys.argv:
@@ -51,7 +52,7 @@ if __name__ == "__main__":
                 exit(1)
             else:
                 files = list(map(
-                    lambda doc: doc["_filename"],
+                    lambda doc: rel_filename(doc["_filename"]),
                     keyword_map[k]
                 ))
                 files.sort()

@@ -6,13 +6,80 @@ import yaml
 import re
 
 
-def find_jotter_root() -> str:
-    d = os.getcwd()
-    while d != "/":
-        if os.path.isdir(os.path.join(d, ".jotter")):
-            return d
+def find_jotter_root(rel_filename: bool=False):
+    """
+    The return type of this function varies.
+
+    If rel_filename == False (default): Return absolute path to jotter
+    root (str)
+
+    If rel_filename == True: Return a tuple (path, rel_filename), where
+    path is the absolute path to jotter root and rel_filename is an
+    anonymous function (str -> str) that can be used to convert filenames
+    that are relative to jotter root into ones that are relative to the
+    current working directory.
+
+    Usage example for the rel_filename function
+    ===========================================
+
+    Suppose we have a jotter that looks something like this:
+
+        in_root.md
+        dir/
+        dir/in_dir.md
+        dir/subdir/
+        dir/subdir/in_subdir.md
+
+    If "dir/subdir" is the current working directory in the jotter,
+    `rel_filename` will produce the following filename conversions:
+
+        > print("dir/subdir/in_subdir.md")
+        dir/subdir/in_subdir.md
+        > print(rel_filename("dir/subdir/in_subdir.md"))
+        in_subdir.md
+
+        > print("dir/in_dir.md")
+        dir/in_dir.md
+        > print(rel_filename("dir/in_dir.md"))
+        ../in_dir.md
+
+        > print("in_root.md")
+        in_root.md
+        > print(rel_filename("in_root.md"))
+        ../../in_root.md
+    """
+    ### Start confusing code ###
+    #
+    # This is the code that produces the rel_filename function
+    # described in the docstring. If this looks like black magic
+    # to you, just skip over this part and continue reading after
+    # "End confusing code".
+    #
+    def def_rel_filename(subdirs):
+        def rel_filename(path: str) -> str:
+            depth = len(subdirs)
+            for lead in subdirs:
+                lead = lead+os.sep
+                if path.startswith(lead):
+                    path = path[len(lead):]
+                    depth -= 1
+                else:
+                    break
+            return depth*"../"+path
+        return rel_filename
+    ### End confusing code ###
+
+    path = os.getcwd()
+    subdirs = list()
+    while path != "/":
+        if os.path.isdir(os.path.join(path, ".jotter")):
+            if rel_filename:
+                return (path, def_rel_filename(subdirs))
+            else:
+                return path
         else:
-            d = os.path.split(d)[0]
+            path, tmp = os.path.split(path)
+            subdirs.insert(0, tmp)
     raise Exception(
         "No jotter root found. Run jotter-init to create a new jotter."
     )
