@@ -267,7 +267,7 @@ jotter-html
 jotter-ctags
 : Create a `tags` file in the jotter's root directory. This file is meant
 to allow users to easily follow internal links between files using their
-text editors. Text editors still needs to handle this file correctly,
+text editors. Text editors still need to handle this file correctly,
 of course.
 
 
