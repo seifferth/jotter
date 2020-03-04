@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Usage jotter-html [options]
+
+Generate or update a static website in `.jotter/static`
+
+Options:
+    -c  --clean     Remove old html files and start conversion
+                    from scratch. The default behaviour is to
+                    only update files that have been changed
+                    since the last conversion.
+    -h  --help      Print this help message and exit.
+"""
 
 import sys
 import os
@@ -173,8 +184,11 @@ def jotter_citeproc(html: str, doc: dict, citekey_map: dict) -> str:
 if __name__ == "__main__":
     jotter_root = find_jotter_root()
     html_root = os.path.join(jotter_root, ".jotter", "static")
-    if len(sys.argv) > 1 and sys.argv[1] in ["-c", "--clean"]:
-        clean_dir(html_root)
+    if len(sys.argv) > 1:
+        if "-h" in sys.argv or "--help" in sys.argv:
+            print(__doc__); exit(0)
+        elif "-c" in sys.argv or "--clean" in sys.argv:
+            clean_dir(html_root)
 
     filename_map, citekey_map, keyword_map = survey(jotter_root)
 
