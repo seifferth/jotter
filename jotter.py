@@ -154,7 +154,7 @@ def survey(jotter_root: str, full_content: bool=True):
             if d.endswith(".jotter"):
                 continue
             for f in fs:
-                if f.endswith(".md"):
+                if f.endswith(".md") or f.endswith(".bib"):
                     yield os.path.join(d, f)
 
     def extract_yaml(content: str) -> dict:
@@ -172,7 +172,8 @@ def survey(jotter_root: str, full_content: bool=True):
         Note that the document dict is updated in-place.
         """
         if "bibtex" in doc.keys():
-            doc["type"] = "excerpt"
+            if doc.get("type") != "bibtex":
+                doc["type"] = "excerpt"
             entries = re.findall(
                 r'@(.*?)\{(.*?),',
                 doc["bibtex"]
@@ -182,26 +183,34 @@ def survey(jotter_root: str, full_content: bool=True):
         else:
             if "type" not in doc.keys():
                 doc["type"] = "note"
-            this = "{}:{}".format(doc["type"], doc["_short_filename"])
+            this = "{}:{}".format(doc["type"], doc["_short_filename"][:-3])
             doc["_citekeys"] = [this]
         if "title" not in doc.keys():
             if "_this" in doc.keys():
                 doc["title"] = doc["_this"]
             else:
-                doc["title"] = doc["_short_filename"]+".md"
+                doc["title"] = doc["_short_filename"]
 
     def parse_doc(filename, jotter_root="", full_content=True) -> dict:
         with open(filename) as f:
             content = f.read()
-        doc = extract_yaml(content)
-        if full_content == True:
-            doc["_content"] = content
+        if filename.endswith(".md"):
+            doc = extract_yaml(content)
+            if full_content == True:
+                doc["_content"] = content
+        elif filename.endswith(".bib"):
+            doc = {
+                "type": "bibtex",
+                "bibtex": content,
+            }
+            if full_content == True:
+                doc["_content"] = ""
         doc["_filename"] = re.sub(
             r'^{}{}?'.format(jotter_root, os.sep), '', filename
         )
-        doc["_short_filename"] = os.path.split(filename)[1][:-3]
+        doc["_short_filename"] = os.path.split(filename)[1]
         doc["_full_filename"] = filename
-        doc["_html_filename"] = re.sub(os.sep, ".", doc["_filename"][:-3])+".html"
+        doc["_html_filename"] = doc["_filename"].replace(os.sep, ".")+".html"
         enrich_metadata(doc)
         return doc
 
