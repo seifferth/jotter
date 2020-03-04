@@ -270,6 +270,12 @@ to allow users to easily follow internal links between files using their
 text editors. Text editors still need to handle this file correctly,
 of course.
 
+jotter-status
+: Show some general information about this jotter, such as the number of
+files, words, etc. This command can also be used to check whether there
+is a jotter in some parent directory (using `jotter-status -q`), similar
+to how one might run `git status` to check if there is a repo somewhere.
+
 
 ## Limitations
 

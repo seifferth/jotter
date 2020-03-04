@@ -1,0 +1,44 @@
+#!/bin/sh
+
+perpage=330     # Average words per page (including yaml blocks)
+
+if test "$1" = "-h" || test "$1" = "--help"; then
+cat <<EOF
+Usage: jotter-status [-q]
+
+Options:
+    -q  --quiet     Don't print anything. This provides a way of
+                    detecting whether or not there is a jotter in some
+                    parent directory, since all jotter commands (except
+                    jotter-init) exit non-zero if there isn't.
+    -h  --help      Print this help message and exit.
+EOF
+exit 0
+fi
+
+while true; do
+    if test -d .jotter; then
+        break
+    elif test "$(pwd)" = "/"; then
+        test "$1" = "-q" || test "$1" = "--quit" || echo \
+            "No jotter root found. Run jotter-init to create a new jotter." >&2
+        exit 1
+    else
+        cd ..
+    fi
+done
+if test "$1" = "-q" || test "$1" = "--quiet"; then
+    exit 0
+fi
+
+words="$(fd -e md|xargs cat|wc -w)"
+lines="$(fd -e md|xargs cat|wc -l)"
+
+cat <<EOF
+References:   $(jotter-bib|grep '^@'|wc -l)
+Keywords:     $(jotter-keyword -l|wc -l)
+Files:        $(fd -e md|wc -l) (plus $(fd -e bib|wc -l) bibtex files)
+Words:        $words
+Lines:        $lines
+Pages:        $((words/perpage))
+EOF
