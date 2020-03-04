@@ -17,11 +17,27 @@ import re
 from jotter import find_jotter_root, survey
 
 def get_bib(citekey_map, citekeys: list):
+    done = set()
     for key in citekeys:
+        if key in done:
+            continue
         try:
             bibtex = re.split(r'\n\s*@', "\n"+citekey_map[key]["bibtex"])
             for entry in bibtex:
                 if re.match(r'^.*?{'+key+r',', entry):
+                    crossref = re.findall(
+                        r'(xref|crossref)\s*=\s*[{"](.*?)[}"]',
+                        entry,
+                        re.I,
+                    )
+                    for crossref_type, crossref_key in crossref:
+                        if crossref_key not in done:
+                            for dep in get_bib(citekey_map, [crossref_key]):
+                                dep_key = re.findall(r'^@.*?{(.*?),', dep)[0]
+                                if dep_key not in done:
+                                    done.add(dep_key)
+                                    yield dep
+                    done.add(key)
                     yield '@'+re.sub(r'\n+$', '', entry)
                     break
         except KeyError:
