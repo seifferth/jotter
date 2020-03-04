@@ -307,12 +307,6 @@ to how one might run `git status` to check if there is a repo somewhere.
 
 ## Known bugs
 
-- `jotter-bib` still uses some slightly flawed heuristics for locating
-  metadata blocks in markdown files. Although I didn't test it, I
-  would expect `jotter-bib` to produce faulty results (including broken
-  bibtex syntax) if the string `\n\n---\n\n` is used as a horizontal
-  rule anywhere in a markdown file. This bug should be automatically
-  fixed once `jotter-bib` is rewritten in python.
 - The metedata extraction function (`survey`) from `jotter.py` doesn't
   account for code blocks or html comments. Metadata extraction could thus
   be broken by crafting (or inadvertently writing) code blocks or comments
