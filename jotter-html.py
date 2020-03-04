@@ -24,7 +24,7 @@ def create_index(filename_map, citekey_map, keyword_map):
     note_types = list(set(map(lambda doc: doc["type"], filename_map.values())))
     note_types.sort()
     for t in note_types:
-        if t == "excerpt":
+        if t in ["excerpt", "bibtex"]:
             continue
         index.append("\n\n\n# {}\n\n\n".format(t.capitalize()))
         l = list()
@@ -32,13 +32,19 @@ def create_index(filename_map, citekey_map, keyword_map):
             l.append("- [{}]({})\n".format(doc["title"], doc["_html_filename"]))
         l.sort(key=lambda x: x.lower())
         index.extend(l)
-    index.append("\n\n\n# Excerpt\n\n\n")
-    l = list()
+    excerpt = list(); bibtex = list()
     for citekey, doc in citekey_map.items():
         if doc["type"] == "excerpt":
-            l.append("- [{}]({})\n".format(citekey, doc["_html_filename"]))
-    l.sort(key=lambda x: x.lower())
-    index.extend(l)
+            excerpt.append("- [{}]({})\n".format(
+                                    citekey, doc["_html_filename"]))
+        elif doc["type"] == "bibtex":
+            bibtex.append("- [{}]({})\n".format(
+                                    citekey, doc["_html_filename"]))
+    excerpt.sort(key=lambda x: x.lower())
+    index.append("\n\n\n# Excerpt\n\n\n")
+    index.extend(excerpt)
+    index.append("\n\n\n# Bibtex\n\n\n")
+    index.extend(bibtex)
     index.append("\n\n\n# Files\n\n\n")
     l = list()
     for doc in filename_map.values():
