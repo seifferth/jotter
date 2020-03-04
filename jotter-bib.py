@@ -7,14 +7,19 @@ Positional Arguments:
     citekeys        Only include specific citekeys. If this argument
                     is omitted, the full bibliography will be printed.
 Options:
-    -l  --list      List all bibtex citekeys defined in this jotter
-    -L  --list-all  List all citekeys, including non-bibtex ones
+    -C PATH         Change directory before executing command. This
+        --cd PATH   is useful for invoking jotter-bib from a directory
+                    that is not part of the jotter itself, e. g. when
+                    compiling the bibliography for an essay.
+    -l  --list      List all bibtex citekeys defined in this jotter.
+    -L  --list-all  List all citekeys, including non-bibtex ones.
         --no-deps   Do not include dependencies for "crossref" or
-                    "xref" entries
-    -h  --help      Print this help message and exit
+                    "xref" entries.
+    -h  --help      Print this help message and exit.
 """
 
 import sys
+import os
 import re
 from jotter import find_jotter_root, survey
 
@@ -81,6 +86,23 @@ if __name__ == "__main__":
     if "--no-deps" in sys.argv:
         deps=False
         sys.argv.remove("--no-deps")
+    if "-C" in sys.argv or "--cd" in sys.argv:
+        if "-C" in sys.argv:
+            cd_opt = "-C"
+        elif "--cd" in sys.argv:
+            cd_opt = "--cd"
+        try:
+            opt_i = sys.argv.index(cd_opt)
+            new_dir = sys.argv[opt_i+1]
+            del sys.argv[opt_i:opt_i+2]
+        except IndexError:
+            print("{} requires an argument".format(cd_opt), file=sys.stderr)
+            exit(1)
+        try:
+            os.chdir(new_dir)
+        except (FileNotFoundError, NotADirectoryError) as e:
+            print(re.sub(r'^\[.*\] ', '', str(e)), file=sys.stderr)
+            exit(1)
     if len(sys.argv) == 1:
         print_bib(None, deps=deps)
     elif "-h" in sys.argv or "--help" in sys.argv:
