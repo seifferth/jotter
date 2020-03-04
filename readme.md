@@ -21,7 +21,6 @@ further explanation below).
 
 - POSIX-compliant shell scripting environment
 - Python 3
-- [pandoc](https://pandoc.org)
 - [fd-find](https://github.com/sharkdp/fd)
 - [pyyaml](https://pyyaml.org)
 - [pypandoc](https://github.com/bebraw/pypandoc) for `jotter-html`
