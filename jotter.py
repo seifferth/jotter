@@ -180,11 +180,24 @@ def survey(jotter_root: str, full_content: bool=True):
             )
             doc["_citekeys"] = list(map(lambda x: x[1], entries))
             if len(doc["_citekeys"]) == 1: doc["_this"] = doc["_citekeys"][0]
+            if "id" in doc.keys():
+                ids = doc["id"]
+                if type(ids) != list:
+                    ids = [ids]
+                doc["_citekeys"].extend(ids)
         else:
             if "type" not in doc.keys():
                 doc["type"] = "note"
-            this = "{}:{}".format(doc["type"], doc["_short_filename"][:-3])
-            doc["_citekeys"] = [this]
+            if "id" in doc.keys():
+                ids = doc["id"]
+            else:
+                ids = "{}:{}".format(
+                    doc["type"],
+                    doc["_short_filename"][:-3]
+                )
+            if type(ids) != list:
+                ids = [ids]
+            doc["_citekeys"] = ids
         if "title" not in doc.keys():
             if "_this" in doc.keys():
                 doc["title"] = doc["_this"]
