@@ -107,24 +107,6 @@ Should jotter ever regain the ability to export a bunch of markdown
 files in some other format (html or pdf, for instance), support for
 linking citekeys is planned.
 
-### Using citekeys
-
-Citekeys are used in exactly the same way as they are in Pandoc Markdown
-(by prefacing them with `@`). Here's an example reusing some of the
-citekeys from the examples above:
-
-```
-There are many tools one could use for academic writing. One of them is
-a plain old text editor combined with a powerful markdown processor such
-as pandoc. Indeed, it has been suggested by Dennis Tenen [@author:tenen]
-and Grant Wythoff [@author:wythoff] that this is probably the most
-sustainable way of doing one's academic writing [@sustainable-authorship].
-
-There are also quite a lot of wiki systems out there, as described in
-@note:wiki-systems. [Jotter](https://github.com/seifferth/jotter) is
-but one of them.
-```
-
 ## Commands
 
 jotter
