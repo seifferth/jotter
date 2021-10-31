@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if test "$1" = "-h" || test "$1" = "--help"; then
+cat <<EOF
+Usage: jotter-ctags [-h|--help]
+
+Write a ctags-like tags file with file references to bibliography
+declarations.
+EOF
+exit 0
+fi
+
+fd -I -e md | while read filename; do
+    cat "$filename" | awk '
+        /^---$/ && yaml == 0        { yaml = 1; next }
+        /^---$/ && yaml == 1        { yaml = 0; next }
+        /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
+        /^bibtex:/ && yaml == 1     { bibtex = 1; next }
+        /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
+
+        yaml && bibtex              { print }
+    ' |
+    sed 's,^    ,,' |
+    grep '^[ \t]*@[^{]*{' |
+    while read line; do
+        tag="$(printf '%s' "$line"|sed 's,[ \t]*@[^{]*{,,;s/,[ \t]*//')"
+        printf '%s\t%s\t/%s\n' "$tag" "$filename" "$line"
+    done
+done | sort > tags
