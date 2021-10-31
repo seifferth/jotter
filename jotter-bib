@@ -2,9 +2,9 @@
 
 if test "$1" = "-h" || test "$1" = "--help"; then
 cat <<EOF
-Usage: jotter-bib
+Usage: jotter-bib [-h|--help]
 
-Extract all bibtex fields from markdown files
+Extract all bibtex fields from markdown files.
 EOF
 exit 0
 fi
