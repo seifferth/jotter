@@ -2,7 +2,7 @@
 
 if test "$1" = "-h" || test "$1" = "--help"; then
 cat <<EOF
-Usage: jotter-ctags [-h|--help]
+Usage: jotter-tags [-h|--help]
 
 Write a ctags-like tags file with file references to bibliography
 declarations.
