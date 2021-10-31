@@ -9,17 +9,6 @@ EOF
 exit 0
 fi
 
-while true; do
-    if test -d .jotter; then
-        break
-    elif test "$(pwd)" = "/"; then
-        echo "No jotter root found. Run jotter-init to create a new jotter." >&2
-        exit 1
-    else
-        cd ..
-    fi
-done
-
 cat <<EOF
 % Composite Bibliography
 % Jotter
