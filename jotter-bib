@@ -25,6 +25,5 @@ fd -I -e md | while read filename; do
         /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
 
         yaml && bibtex              { print }
-        END                         { print "" }
     '
 done | sed 's,^    ,,g'
