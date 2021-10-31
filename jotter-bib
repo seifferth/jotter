@@ -5,6 +5,7 @@ cat <<EOF
 Usage: jotter-bib [-h|--help]
 
 Extract all bibtex fields from markdown files.
+
 EOF
 exit 0
 fi

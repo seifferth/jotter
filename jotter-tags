@@ -6,6 +6,7 @@ Usage: jotter-tags [-h|--help]
 
 Write a ctags-like tags file with file references to bibliography
 declarations.
+
 EOF
 exit 0
 fi
