@@ -16,8 +16,9 @@ cat <<EOF
 
 EOF
 
-fd -I -e md | while read filename; do
-    cat "$filename" | awk '
+fd -I -e md |
+    xargs cat |
+    awk '
         /^---$/ && yaml == 0        { yaml = 1; next }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
@@ -25,5 +26,5 @@ fd -I -e md | while read filename; do
         /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
 
         yaml && bibtex              { print }
-    '
-done | sed 's,^    ,,g'
+    ' |
+    sed 's,^    ,,g'
