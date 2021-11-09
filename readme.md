@@ -125,7 +125,10 @@ jotter-tags
 : Create a `tags` file in the current working directory. This file is meant
 to allow users to easily follow internal links between files using their
 text editors. Text editors still need to handle this file correctly,
-of course.
+of course. The `tags` file will include tags for both bibtex entries and
+[pandoc-crossref] style section, figure, table and equation labels.
+
+[pandoc-crossref]: http://lierdakil.github.io/pandoc-crossref/
 
 jotter-status
 : Show some general information about this jotter, such as the number of
