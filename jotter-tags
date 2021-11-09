@@ -25,5 +25,11 @@ fd -I -e md | while read filename; do
             sub(",$", "", tag)
             print tag"\t"filename"\t/"$1
         }
+
+        !yaml && match($0, /{.*#sec:[^ \t}]+.*}/, m) {
+            match(m[0], /#sec:[^ \t}]+/, n)
+            sub(/^#/, "", n[0])
+            print(n[0])"\t"filename"\t/"m[0]
+        }
     '
 done | sort > tags
