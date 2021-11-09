@@ -141,7 +141,7 @@ files, words, etc.
 
 ## Known bugs
 
-- Metedata extraction does not account for code blocks or html
-  comments. Metadata extraction could thus be broken by crafting (or
-  inadvertently writing) code blocks or comments which contain content
-  that looks like the beginning of a metadata block.
+- Metedata extraction does not account for html comments. Metadata
+  extraction could thus be broken by crafting (or inadvertently writing)
+  comments which contain content that looks like the beginning of a
+  metadata block.

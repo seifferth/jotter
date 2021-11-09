@@ -12,6 +12,13 @@ exit 0
 fi
 
 awk '
+        ablock == 0 && bblock == 0 && /^```/    { ablock = 1; next }
+        ablock == 0 && bblock == 0 && /^~~~/    { bblock = 1; next }
+        ablock == 1 && /^```/                   { ablock = 0 }
+        bblock == 1 && /^~~~/                   { bblock = 0 }
+        ablock == 1                             { next }
+        bblock == 1                             { next }
+
         /^---$/ && yaml == 0        { mayyaml = 1; next }
         mayyaml == 1 && /[^ \t]/    { yaml = 1 }
         mayyaml == 1                { mayyaml = 0 }
