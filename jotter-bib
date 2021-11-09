@@ -20,7 +20,9 @@ EOF
 fd -I -e md |
     xargs cat |
     awk '
-        /^---$/ && yaml == 0        { yaml = 1; next }
+        /^---$/ && yaml == 0        { mayyaml = 1; next }
+        mayyaml == 1 && /[^ \t]/    { yaml = 1 }
+        mayyaml == 1                { mayyaml = 0 }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
         /^bibtex:/ && yaml == 1     { bibtex = 1; next }

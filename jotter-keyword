@@ -39,7 +39,9 @@ fi
 
 fd -I -e md | while read filename; do
     cat "$filename" | awk '
-        /^---$/ && yaml == 0        { yaml = 1; next }
+        /^---$/ && yaml == 0        { mayyaml = 1; next }
+        mayyaml == 1 && /[^ \t]/    { yaml = 1 }
+        mayyaml == 1                { mayyaml = 0 }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
         /^keywords:/ && yaml == 1     { keywords = 1; next }
