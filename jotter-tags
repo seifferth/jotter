@@ -12,9 +12,7 @@ exit 0
 fi
 
 fd -I -e md | while read filename; do
-    cat "$filename" | awk '
-        BEGIN                       { filename = "'"$filename"'" }
-
+    cat "$filename" | awk -vfilename="$filename" '
         /^---$/ && yaml == 0        { yaml = 1; next }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
