@@ -13,18 +13,19 @@ fi
 
 fd -I -e md | while read filename; do
     cat "$filename" | awk '
+        BEGIN                       { filename = "'"$filename"'" }
+
         /^---$/ && yaml == 0        { yaml = 1; next }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
         /^bibtex:/ && yaml == 1     { bibtex = 1; next }
         /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
 
-        yaml && bibtex              { print }
-    ' |
-    sed 's,^    ,,' |
-    grep '^[ \t]*@[^{]*{' |
-    while read line; do
-        tag="$(printf '%s' "$line"|sed 's,[ \t]*@[^{]*{,,;s/,[ \t]*//')"
-        printf '%s\t%s\t/%s\n' "$tag" "$filename" "$line"
-    done
+        yaml && bibtex && $1 ~ /^@[^{]*{/ {
+            tag = $1
+            sub("^@[^{]*{", "", tag)
+            sub(",$", "", tag)
+            print tag"\t"filename"\t/"$1
+        }
+    '
 done | sort > tags
