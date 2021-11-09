@@ -11,8 +11,7 @@ EOF
 exit 0
 fi
 
-fd -I -e md | while read filename; do
-    cat "$filename" | awk -vfilename="$filename" '
+awk '
         /^---$/ && yaml == 0        { yaml = 1; next }
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
@@ -23,13 +22,13 @@ fd -I -e md | while read filename; do
             tag = $1
             sub("^@[^{]*{", "", tag)
             sub(",$", "", tag)
-            print tag"\t"filename"\t/"$1
+            print tag"\t"FILENAME"\t/"$1
         }
 
         !yaml && match($0, /{.*#sec:[^ \t}]+.*}/, m) {
             match(m[0], /#sec:[^ \t}]+/, n)
             sub(/^#/, "", n[0])
-            print(n[0])"\t"filename"\t/"m[0]
+            print(n[0])"\t"FILENAME"\t/"m[0]
         }
-    '
-done | sort > tags
+
+    ' $(fd -I -e md) | sort > tags
