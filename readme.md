@@ -145,3 +145,9 @@ files, words, etc.
   extraction could thus be broken by crafting (or inadvertently writing)
   comments which contain content that looks like the beginning of a
   metadata block.
+
+## License
+
+All files in this repository are made available under the terms of the
+GNU General Purpose License, version 3 or later. A copy of that license
+is included in the repository as `license.txt`.
