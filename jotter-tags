@@ -32,12 +32,18 @@ awk '
             sub("^@[^{]*{", "", tag)
             sub(",$", "", tag)
             print tag"\t"FILENAME"\t/"$1
+            next
         }
 
         !yaml && match($0, /{.*#(sec|fig|tbl|eq):[^ \t}]+.*}/, m) {
             match(m[0], /#(sec|fig|tbl|eq):[^ \t}]+/, n)
             sub(/^#/, "", n[0])
             print(n[0])"\t"FILENAME"\t/"m[0]
+            next
+        }
+        !yaml && match($0, /^#.*({#([^ \t]+).*})/, m) {
+            print m[2]"\t"FILENAME"\t/"m[1]
+            next
         }
 
     ' $(fd -I -e md) | sort > tags
