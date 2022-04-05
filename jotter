@@ -1,6 +1,26 @@
 #!/bin/sh
 
-if test "$(which jotter-$1 2>/dev/null)"; then
+if test "$1" = "-h" || test "$1" = "--help"; then
+cat <<EOF
+Usage: jotter [-h|--help] COMMAND [ARG]...
+
+See 'jotter COMMAND --help' for further information about
+individual commands.
+
+Commands
+    bib         Extract bibliographic information from files
+    tags        Create a ctags-like 'tags' file with citekeys
+                as identifiers
+    status      Display some statistical information about the
+                files in this jotter
+    ls          Print a list of citekeys found in this jotter
+    rev         Perform a reverse lookup of citekeys (i. e. find
+                all notes that link to a certain entry)
+    keyword     Search files that contain certain keywords in
+                yaml blocks
+
+EOF
+elif test "$(which jotter-$1 2>/dev/null)"; then
     jotter-$@
 else
     echo "Command not found: jotter-$1" >&2
