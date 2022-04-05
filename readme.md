@@ -14,6 +14,7 @@ since jotter ignores any files with different extensions.
 
 - POSIX-compliant shell scripting environment
 - [fd-find](https://github.com/sharkdp/fd)
+- python3 (for jotter-ls and jotter-rev)
 
 ## Installing
 
@@ -133,6 +134,14 @@ of course. The `tags` file will include tags for both bibtex entries and
 jotter-status
 : Show some general information about this jotter, such as the number of
 files, words, etc.
+
+jotter-ls
+: Print a list of citekeys found in this jotter to stdout. This list can
+optionally be filtered by specifying glob expressions.
+
+jotter-rev
+: Perform reverse citekey lookups. That is, print a list of all notes
+that reference a certain key.
 
 ## Limitations
 
