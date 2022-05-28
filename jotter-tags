@@ -25,7 +25,7 @@ awk '
         /^---$/ && yaml == 1        { yaml = 0; next }
         /^\.\.\.$/ && yaml == 1     { yaml = 0; next }
         /^bibtex:/ && yaml == 1     { bibtex = 1; next }
-        /^[^ ]/ && bibtex == 1      { bibtex = 0; next }
+        /^[^ ]/ && bibtex && yaml   { bibtex = 0; next }
 
         yaml && bibtex && $1 ~ /^@[^{]*{/ {
             tag = $1
