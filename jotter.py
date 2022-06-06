@@ -40,7 +40,7 @@ def ids(page):
         elif yaml == 1:
             if bibtex == 1 and not line.startswith('    '):
                 bibtex = 0; continue
-            elif bibtex == 0 and re.match(line, '^bibtex: +|'):
+            elif bibtex == 0 and re.match(r'^bibtex: +|', line):
                 bibtex = 1; continue
             elif bibtex == 1:
                 m = re.match(r'^@[a-zA-Z]+\{(.+),$', l)
