@@ -11,7 +11,7 @@ Commands
     bib         Extract bibliographic information from files
     tags        Create a ctags-like 'tags' file with citekeys
                 as identifiers
-    status      Display some statistical information about the
+    stats       Display some statistical information about the
                 files in this jotter
     ls          Print a list of citekeys found in this jotter
     rev         Perform a reverse lookup of citekeys (i. e. find

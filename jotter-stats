@@ -4,7 +4,7 @@ perpage=330     # Average words per page (including yaml blocks)
 
 if test "$1" = "-h" || test "$1" = "--help"; then
 cat <<EOF
-Usage: jotter-status
+Usage: jotter-stats
 
 Options:
     -h  --help      Print this help message and exit.

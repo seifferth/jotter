@@ -131,9 +131,9 @@ of course. The `tags` file will include tags for both bibtex entries and
 
 [pandoc-crossref]: http://lierdakil.github.io/pandoc-crossref/
 
-jotter-status
-: Show some general information about this jotter, such as the number of
-files, words, etc.
+jotter-stats
+: Show some statistical information about this jotter, such as the number
+of files, words, etc.
 
 jotter-ls
 : Print a list of citekeys found in this jotter to stdout. This list can
