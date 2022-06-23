@@ -143,6 +143,11 @@ jotter-rev
 : Perform reverse citekey lookups. That is, print a list of all notes
 that reference a certain key.
 
+jotter-get
+: Print a list containing certain pieces of information about the graph
+constituted by the linked notes. These pieces of information include lists
+of root nodes, unconnected nodes or subgraphs.
+
 ## Limitations
 
 - All content files must contain an `.md`-Extension. Files with different
