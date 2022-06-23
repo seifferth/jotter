@@ -73,8 +73,8 @@ by the linked notes. INFO may be any of the following:
                 to other notes.
   graphs        A summary of subgraphs that have no links between
                 one another, excluding hermit notes.
-  missing       Get a list notes that are referenced but do not
-                exist, thereby resulting in broken links.
+  missing       Get a list of notes that are referenced but do not
+                exist. I. e., the targets of broken links.
 """.lstrip()
 
 if __name__ == "__main__":
