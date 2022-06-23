@@ -26,7 +26,9 @@ if __name__ == "__main__":
             p_ids = ids(p)
             for k in p_ids:
                 keys.add(k)
+    def printkey(key):
+        print(f'- @{key}')
     for k in sorted(keys):
-        if not qs: print(k); continue
+        if not qs: printkey(k); continue
         for q in qs:
-            if fnmatchcase(k, q): print(k); break
+            if fnmatchcase(k, q): printkey(k); break
