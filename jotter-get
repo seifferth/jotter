@@ -131,7 +131,9 @@ if __name__ == "__main__":
                             len(g_leafs)))
             printsome('root', sorted(g_roots))
             printsome('leaf', sorted(g_leafs))
-            printsome('other note', sorted(
+            notelabel = 'note' if len(g_roots)+len(g_leafs) == 0 \
+                               else 'other note'
+            printsome(notelabel, sorted(
                 g.difference(g_roots).difference(g_leafs)
             ))
             if i < len(gs): print()
