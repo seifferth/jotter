@@ -5,14 +5,11 @@ from fnmatch import fnmatchcase
 from jotter import *
 
 _cli_help = """
-Usage: jotter-ls [KEY|GLOB]...
+Usage: jotter-ls [-h] [KEY|GLOB]...
 
 Print a list of all keys in the jotter. These keys can be filtered by
 specifying a number of KEYs that shall be included, by specifying one
 or more GLOBs that match certain keys, or using a combination of both.
-
-Options:
-    -h  --help      Print this help message and exit
 """.lstrip()
 
 if __name__ == "__main__":
