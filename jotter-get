@@ -25,17 +25,21 @@ def _all_leafs() -> set:
         if not cites(p):
             result.update(ids(p))
     return result
-def _all_roots() -> set:
-    cited_ids = set()
+def _cited_ids() -> set:
+    result = set()
     for p in _pageiter():
-        cited_ids.update(cites(p))
-    return notes().difference(cited_ids)
+        result.update(cites(p))
+    return result
+def _all_roots() -> set:
+    return notes().difference(_cited_ids())
 def hermits() -> set:
     return _all_roots().intersection(_all_leafs())
 def leafs() -> set:
     return _all_leafs().difference(hermits())
 def roots() -> set:
     return _all_roots().difference(hermits())
+def missing() -> set:
+    return _cited_ids().difference(notes())
 def graphs() -> list[set]:
     hs = hermits()
     gs = [ ids(p).union(cites(p)) for p in _pageiter()
@@ -69,6 +73,8 @@ by the linked notes. INFO may be any of the following:
                 to other notes.
   graphs        A summary of subgraphs that have no links between
                 one another, excluding hermit notes.
+  missing       Get a list notes that are referenced but do not
+                exist, thereby resulting in broken links.
 """.lstrip()
 
 if __name__ == "__main__":
@@ -129,6 +135,7 @@ if __name__ == "__main__":
                 g.difference(g_roots).difference(g_leafs)
             ))
             if i < len(gs): print()
+    elif info == 'missing':     printsorted(missing())
     else:
         print(f"Unsupported value for INFO '{info}'", file=sys.stderr)
         exit(1)
