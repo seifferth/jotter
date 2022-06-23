@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+
+import sys
+from jotter import *
+
+def _pageiter():
+    for f in fd():
+        for p in pages(f):
+            yield p
+def _keyiter():
+    for p in _pageiter():
+        for k in ids(p):
+            yield k
+def notes() -> set:
+    return set(_keyiter())
+def dupes() -> dict[str,int]:
+    keycounts = dict()
+    for k in _keyiter():
+        if k not in keycounts: keycounts[k] = 0
+        keycounts[k] += 1
+    return { k: v for k, v in keycounts.items() if v > 1 }
+def _all_leafs() -> set:
+    result = set()
+    for p in _pageiter():
+        if not cites(p):
+            result.update(ids(p))
+    return result
+def _all_roots() -> set:
+    cited_ids = set()
+    for p in _pageiter():
+        cited_ids.update(cites(p))
+    return notes().difference(cited_ids)
+def hermits() -> set:
+    return _all_roots().intersection(_all_leafs())
+def leafs() -> set:
+    return _all_leafs().difference(hermits())
+def roots() -> set:
+    return _all_roots().difference(hermits())
+def graphs() -> list[set]:
+    hs = hermits()
+    gs = [ ids(p).union(cites(p)) for p in _pageiter()
+           if not ids(p).intersection(hs) ]
+    standalone_gs = []
+    while gs:
+        if len(gs) == 1: break
+        g = gs.pop()
+        for i in range(len(gs)):
+            if gs[i].intersection(g):
+                gs[i].update(g)
+                g = None
+                break
+        if g: standalone_gs.append(g)
+    return sorted(standalone_gs, key=lambda x: len(x))
+
+_cli_help = """
+Usage: jotter-get [-h] [INFO]
+
+Get a certain piece of information about the graph constituted
+by the linked notes. INFO may be any of the following:
+
+  notes         A list containing all keys used in this jotter.
+  dupes         A list of duplicate ids that are used more than
+                once in this jotter.
+  roots         Notes with no incoming links from other notes,
+                excluding hermit notes.
+  leafs         Notes with no outgoing links to other notes,
+                excluding hermit notes.
+  hermits       Notes with neither incoming nor outgoing links
+                to other notes.
+  graphs        A summary of subgraphs that have no links between
+                one another, excluding hermit notes.
+""".lstrip()
+
+if __name__ == "__main__":
+    if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
+        print(_cli_help)
+        exit(0)
+    if len(sys.argv) != 2:
+        print('jotter-get takes exactly one argument, not',
+              len(sys.argv)-1, file=sys.stderr)
+        exit(1)
+    def printsorted(keys: set):
+        for k in sorted(keys):
+            print(f'- @{k}')
+    info = sys.argv[1]
+    if   info == 'notes':       printsorted(notes())
+    elif info == 'dupes':
+        ds = dupes()
+        if ds:
+            klen = max((len(k) for k in ds.keys()))
+            vlen = max((len(str(v)) for v in ds.values()))
+        for k, v in sorted(ds.items(), key=lambda x: (x[1], x[0])):
+            frame = '- @{:<'+str(klen)+'}  [used {:>'+str(vlen)+'} times]'
+            print(frame.format(k, v))
+    elif info == 'roots':       printsorted(roots())
+    elif info == 'leafs':       printsorted(leafs())
+    elif info == 'hermits':     printsorted(hermits())
+    elif info == 'graphs':
+        def graphdesc(max_i, i, notes, roots, leafs):
+            frame = '* Graph {:>'+str(len(str(max_i)))+'}  '\
+                    '[{} note{}, {} root{}, {} leaf{}]'
+            return frame.format(
+                i,
+                notes, 's' if notes != 1 else '',
+                roots, 's' if roots != 1 else '',
+                leafs, 's' if leafs != 1 else '',
+            )
+        def printsome(nodetype: str, nodes: list) -> None:
+            if len(nodes) == 0: return
+            elif len(nodes) == 1:
+                print(f'    + {nodetype}: @{nodes[0]}')
+            elif len(nodes) < 3:
+                print(f'    + {nodetype}s:', ', '.join(
+                                        (f'@{k}' for k in nodes)))
+            else:
+                print(f'    + {nodetype}s: @{nodes[0]}, @{nodes[1]}, '\
+                      f'... [{len(nodes)-2} more]')
+        gs = graphs()
+        rs = roots()
+        ls = leafs()
+        for i, g in enumerate(gs, start=1):
+            g_roots = g.intersection(rs)
+            g_leafs = g.intersection(ls)
+            print(graphdesc(len(gs), i, len(g), len(g_roots),
+                            len(g_leafs)))
+            printsome('root', sorted(g_roots))
+            printsome('leaf', sorted(g_leafs))
+            printsome('other note', sorted(
+                g.difference(g_roots).difference(g_leafs)
+            ))
+            if i < len(gs): print()
+    else:
+        print(f"Unsupported value for INFO '{info}'", file=sys.stderr)
+        exit(1)
