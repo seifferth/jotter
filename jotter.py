@@ -60,6 +60,6 @@ def cites(page) -> set:
             yaml = 0; continue
         elif yaml == 1:
             continue
-        m = re.findall(r'@[^, \t:\.;?!\[\]\{\}\(\)]+', l)
+        m = re.findall(r'@[\w_][\w\d_:-]*[\w\d_]', l)
         for k in m: keys.add(k[1:])
     return keys.difference(ids(page))
