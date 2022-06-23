@@ -55,6 +55,12 @@ def graphs() -> list[set]:
                 break
         if g: standalone_gs.append(g)
     return sorted(standalone_gs, key=lambda x: len(x))
+def hubs() -> list[tuple[str,int]]:
+    citecounts = dict()
+    for p in _pageiter():
+        if not ids(p): continue
+        citecounts[sorted(ids(p))[0]] = len(cites(p))
+    return sorted(citecounts.items(), key=lambda x: -x[1])
 
 _cli_help = """
 Usage: jotter-get [-h] [INFO]
@@ -76,6 +82,8 @@ by the linked notes. INFO may be any of the following:
                 one another, excluding hermit notes.
   missing       Get a list of notes that are referenced but do not
                 exist. I. e., the targets of broken links.
+  hubs          The 10 notes with the highest number of outgoing
+                links. Only one id is reported per node.
 """.lstrip()
 
 if __name__ == "__main__":
@@ -89,16 +97,19 @@ if __name__ == "__main__":
     def printsorted(keys: set):
         for k in sorted(keys):
             print(f'- @{k}')
+    def printvalued(items: tuple[str,int], sortkey=lambda x: x, vformat='{}'):
+        if items:
+            klen = max((len(x[0]) for x in items))
+            vlen = max((len(str(x[1])) for x in items))
+            vformat = vformat.format('{:'+str(vlen)+'}')
+        for k, v in sorted(items, key=sortkey):
+            frame = '- @{:<'+str(klen)+'}  ['+vformat+']'
+            print(frame.format(k, v))
     info = sys.argv[1]
     if   info == 'notes':       printsorted(notes())
-    elif info == 'dupes':
-        ds = dupes()
-        if ds:
-            klen = max((len(k) for k in ds.keys()))
-            vlen = max((len(str(v)) for v in ds.values()))
-        for k, v in sorted(ds.items(), key=lambda x: (x[1], x[0])):
-            frame = '- @{:<'+str(klen)+'}  [used {:>'+str(vlen)+'} times]'
-            print(frame.format(k, v))
+    elif info == 'dupes':       printvalued(dupes().items(),
+                                            sortkey=lambda x: (x[1], x[0]),
+                                            vformat='used {} times')
     elif info == 'roots':       printsorted(roots())
     elif info == 'leafs':       printsorted(leafs())
     elif info == 'hermits':     printsorted(hermits())
@@ -142,6 +153,9 @@ if __name__ == "__main__":
             ))
             if i < len(gs): print()
     elif info == 'missing':     printsorted(missing())
+    elif info == 'hubs':        printvalued(hubs()[:10],
+                                            sortkey=lambda x: (-x[1], x[0]),
+                                            vformat='{} links')
     else:
         print(f"Unsupported value for INFO '{info}'", file=sys.stderr)
         exit(1)
