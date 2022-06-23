@@ -62,7 +62,8 @@ Usage: jotter-get [-h] [INFO]
 Get a certain piece of information about the graph constituted
 by the linked notes. INFO may be any of the following:
 
-  notes         A list containing all keys used in this jotter.
+  notes         Get a list containing all keys used in this jotter,
+                excluding missing notes.
   dupes         A list of duplicate ids that are used more than
                 once in this jotter.
   roots         Notes with no incoming links from other notes,
@@ -102,12 +103,13 @@ if __name__ == "__main__":
     elif info == 'leafs':       printsorted(leafs())
     elif info == 'hermits':     printsorted(hermits())
     elif info == 'graphs':
-        def graphdesc(max_i, i, notes, roots, leafs):
+        def graphdesc(max_i, i, notes, roots, leafs, missing):
             frame = '* Graph {:>'+str(len(str(max_i)))+'}  '\
-                    '[{} note{}, {} root{}, {} leaf{}]'
+                    '[{} note{}, {} missing, {} root{}, {} leaf{}]'
             return frame.format(
                 i,
                 notes, 's' if notes != 1 else '',
+                missing,
                 roots, 's' if roots != 1 else '',
                 leafs, 's' if leafs != 1 else '',
             )
@@ -124,11 +126,13 @@ if __name__ == "__main__":
         gs = graphs()
         rs = roots()
         ls = leafs()
+        ms = missing()
         for i, g in enumerate(gs, start=1):
             g_roots = g.intersection(rs)
             g_leafs = g.intersection(ls)
+            g_missing = g.intersection(ms)
             print(graphdesc(len(gs), i, len(g), len(g_roots),
-                            len(g_leafs)))
+                            len(g_leafs), len(g_missing)))
             printsome('root', sorted(g_roots))
             printsome('leaf', sorted(g_leafs))
             notelabel = 'note' if len(g_roots)+len(g_leafs) == 0 \
