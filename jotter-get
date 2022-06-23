@@ -84,15 +84,16 @@ by the linked notes. INFO may be any of the following:
                 exist. I. e., the targets of broken links.
   hubs          The 10 notes with the highest number of outgoing
                 links. Only one id is reported per node.
+  cites <KEY>   Print the citations found in the note with the
+                specified KEY.
 """.lstrip()
 
 if __name__ == "__main__":
     if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
         print(_cli_help)
         exit(0)
-    if len(sys.argv) != 2:
-        print('jotter-get takes exactly one argument, not',
-              len(sys.argv)-1, file=sys.stderr)
+    if len(sys.argv) < 2:
+        print('jotter-get takes at least one argument', file=sys.stderr)
         exit(1)
     def printsorted(keys: set):
         for k in sorted(keys):
@@ -156,6 +157,14 @@ if __name__ == "__main__":
     elif info == 'hubs':        printvalued(hubs()[:10],
                                             sortkey=lambda x: (-x[1], x[0]),
                                             vformat='{} links')
+    elif info == 'cites':
+        if len(sys.argv) != 3:
+            print("'jotter get cites' requires exactly one "\
+                  "KEY to be specified", file=sys.stderr); exit(1)
+        for p in _pageiter():
+            if sys.argv[2] in ids(p):
+                for k in sorted(cites(p)):
+                    print(f'- @{k}')
     else:
         print(f"Unsupported value for INFO '{info}'", file=sys.stderr)
         exit(1)
