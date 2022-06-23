@@ -27,11 +27,8 @@ if __name__ == "__main__":
         exit(1)
     for f in fd():
         for p in pages(f):
-            p_ids = ids(p)
-            p_cites = cites(p).difference(p_ids)
-            if not p_ids: continue
             m = False
             for q in qs:
-                for k in p_cites:
+                for k in cites(p):
                     if fnmatchcase(k, q): m = True; break
-            if m: print('-', ', '.join(sorted((f'@{k}' for k in p_ids))))
+            if m: print('-', ', '.join(sorted((f'@{k}' for k in ids(p)))))

@@ -28,8 +28,9 @@ def pages(filename):
                 p = [line]; yaml = 2
             else:
                 p.append(line)
-        yield ''.join(p)
-def ids(page):
+        page = ''.join(p)
+        if ids(page): yield page
+def ids(page) -> set:
     ids = set(); yaml = 0; bibtex = 0
     for line in page.splitlines():
         l = line.strip()
@@ -49,7 +50,7 @@ def ids(page):
             m = re.match(r'^#.*\{#([^ \}]+)', line)
             if m: ids.add(m.groups()[0]); continue
     return ids
-def cites(page):
+def cites(page) -> set:
     keys = set(); yaml = 0; bibtex = 0
     for line in page.splitlines():
         l = line.strip()
@@ -61,4 +62,4 @@ def cites(page):
             continue
         m = re.findall(r'@[^, \t:\.;?!\[\]\{\}\(\)]+', l)
         for k in m: keys.add(k[1:])
-    return keys
+    return keys.difference(ids(page))
