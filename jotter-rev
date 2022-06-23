@@ -31,4 +31,5 @@ if __name__ == "__main__":
             for q in qs:
                 for k in cites(p):
                     if fnmatchcase(k, q): m = True; break
-            if m: print('-', ', '.join(sorted((f'@{k}' for k in ids(p)))))
+            if m and ids(p):
+                print('-', ', '.join(sorted((f'@{k}' for k in ids(p)))))
