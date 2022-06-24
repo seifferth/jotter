@@ -39,7 +39,7 @@ def ids(page) -> set:
         elif yaml == 1 and l in ('---', '...'):
             yaml = 0; continue
         elif yaml == 1:
-            if bibtex == 1 and not line.startswith('    '):
+            if bibtex == 1 and l and not line.startswith('    '):
                 bibtex = 0; continue
             elif bibtex == 0 and re.match(r'^bibtex: +|', line):
                 bibtex = 1; continue
