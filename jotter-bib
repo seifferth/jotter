@@ -1,17 +1,32 @@
 #!/bin/sh
 
-if test "$1" = "-h" || test "$1" = "--help"; then
+print_help() {
 cat <<EOF
-Usage: jotter-bib [-h|--help] [--root DIR]
+Usage: jotter-bib [-h|--help] [--root DIR] [--stdout]
 
-Extract all bibtex fields from markdown files.
+Extract all bibtex fields from markdown files. If a jotter
+root directory is used (i. e. the '--root' flag is omitted),
+the references are stored in a file named 'references.bib' in
+the jotter root directory by default. Use '--stdout' to print
+them to standard output instead.
 
 EOF
-exit 0
-fi
+}
+to_outfile() {
+    if test "$use_stdout" = 0; then cat >references.bib; else cat; fi
+}
 
-if test "$1" = "--root"; then
-    cd "$2"; shift 2
+use_stdout=0
+jotter_root=''
+while test "$#" -gt 0; do
+    case "$1" in
+        -h|--help)  print_help; exit 0;;
+        --root)     use_stdout=1; jotter_root="$2"; shift 2;;
+        --stdout)   use_stdout=1; shift;;
+    esac
+done
+if test "$jotter_root"; then
+    cd "$jotter_root"
 else
     while true; do
         if test -d .jotter; then
@@ -25,7 +40,7 @@ else
     done
 fi
 
-cat <<EOF
+cat <<EOF | to_outfile
 % Composite Bibliography
 % Jotter
 % $(date -R)
@@ -52,4 +67,4 @@ fd -I -e md |
 
         yaml && bibtex              { print }
     ' |
-    sed 's,^    ,,g'
+    sed 's,^    ,,g' | to_outfile

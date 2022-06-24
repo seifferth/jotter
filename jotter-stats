@@ -30,7 +30,7 @@ lines="$(fd -e md|xargs cat|wc -l)"
 
 cat <<EOF
 Notes:        $(jotter-get --root . notes|wc -l)
-References:   $(jotter-bib --root .|grep '^[ \t]*@'|wc -l)
+References:   $(jotter-bib --stdout --root .|grep '^[ \t]*@'|wc -l)
 Files:        $(fd -e md|wc -l)
 Words:        $words
 Lines:        $lines
