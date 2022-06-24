@@ -8,6 +8,8 @@ See 'jotter COMMAND --help' for further information about
 individual commands.
 
 Commands
+    init        Initialize a new jotter by marking a certain
+                directory as the jotter's root dir
     bib         Extract bibliographic information from files
     tags        Create a ctags-like 'tags' file with citekeys
                 as identifiers
