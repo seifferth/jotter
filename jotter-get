@@ -135,21 +135,28 @@ if __name__ == "__main__":
                 roots, 's' if roots != 1 else '',
                 leafs, 's' if leafs != 1 else '',
             )
+        def printlistitem(text):
+            from textwrap import fill
+            print(fill(text, initial_indent='    + ',
+                          subsequent_indent='      ',
+                       width=79,
+                       break_long_words=False,
+                       break_on_hyphens=False))
         def printsome(nodetype: str, nodes: list) -> None:
             if len(nodes) == 0 or num_nodes == 0: return
             elif len(nodes) == 1:
-                print(f'    + {nodetype}: @{nodes[0]}')
+                printlistitem(f'{nodetype}: @{nodes[0]}')
             elif num_nodes > 0 and len(nodes) < num_nodes+1:
-                print(f'    + {nodetype}s:', ', '.join(
+                printlistitem(f'{nodetype}s:' + ', '.join(
                                         (f'@{k}' for k in nodes)))
             else:
                 suffix = ''
                 if num_nodes >= 0:
                     suffix = f', ... [{len(nodes)-num_nodes} more]'
                     nodes = nodes[:num_nodes+1]
-                print(f'    + {nodetype}s: ' +
-                      ', '.join((f'@{k}' for k in nodes)) +
-                      suffix)
+                printlistitem(f'{nodetype}s: ' +
+                              ', '.join((f'@{k}' for k in nodes)) +
+                              suffix)
         gs = graphs()
         rs = roots()
         ls = leafs()
