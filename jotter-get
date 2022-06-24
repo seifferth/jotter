@@ -162,7 +162,7 @@ if __name__ == "__main__":
             else: nhubs = int(sys.argv[2][2:])
         else: nhubs = 20
         printvalued(hubs()[:nhubs] if nhubs >= 0 else hubs(),
-                    sortkey=lambda x: (-x[1], x[0]),
+                    sortkey=lambda x: (x[1], x[0]),
                     vformat='{} links')
     elif info == 'cites':
         if len(sys.argv) != 3:
