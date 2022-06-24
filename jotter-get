@@ -13,7 +13,7 @@ def _keyiter():
             yield k
 def notes() -> set:
     return set(_keyiter())
-def dupes() -> dict[str,int]:
+def dups() -> dict[str,int]:
     keycounts = dict()
     for k in _keyiter():
         if k not in keycounts: keycounts[k] = 0
@@ -70,7 +70,7 @@ by the linked notes. INFO may be any of the following:
 
   notes         Get a list containing all keys used in this jotter,
                 excluding missing notes.
-  dupes         A list of duplicate ids that are used more than
+  dups          A list of duplicate ids that are used more than
                 once in this jotter.
   roots         Notes with no incoming links from other notes,
                 excluding hermit notes.
@@ -110,7 +110,7 @@ if __name__ == "__main__":
             print(frame.format(k, v))
     info = sys.argv[1]
     if   info == 'notes':       printsorted(notes())
-    elif info == 'dupes':       printvalued(dupes().items(),
+    elif info == 'dups':        printvalued(dups().items(),
                                             sortkey=lambda x: (x[1], x[0]),
                                             vformat='used {} times')
     elif info == 'roots':       printsorted(roots())
