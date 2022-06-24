@@ -2,10 +2,16 @@
 
 if test "$1" = "-h" || test "$1" = "--help"; then
 cat <<EOF
-Usage: jotter [-h|--help] COMMAND [ARG]...
+Usage: jotter [-h|--help] COMMAND [--root DIR] [ARG]...
 
 See 'jotter COMMAND --help' for further information about
 individual commands.
+
+Most commands (except for 'jotter init') accept a '--root' option
+that causes the command to skip searching a jotter root directory
+created with 'jotter init'.  This may be convenient to use the
+commands on the subset of a given jotter or even outside of any
+initialized jotter.
 
 Commands
     init        Initialize a new jotter by marking a certain

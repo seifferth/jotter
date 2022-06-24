@@ -2,12 +2,27 @@
 
 if test "$1" = "-h" || test "$1" = "--help"; then
 cat <<EOF
-Usage: jotter-bib [-h|--help]
+Usage: jotter-bib [-h|--help] [--root DIR]
 
 Extract all bibtex fields from markdown files.
 
 EOF
 exit 0
+fi
+
+if test "$1" = "--root"; then
+    cd "$2"; shift 2
+else
+    while true; do
+        if test -d .jotter; then
+            break
+        elif test "$(pwd)" = "/"; then
+            echo "No jotter root found" >&2
+            exit 1
+        else
+            cd ..
+        fi
+    done
 fi
 
 cat <<EOF

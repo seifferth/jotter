@@ -63,3 +63,55 @@ def cites(page) -> set:
         m = re.findall(r'@[\w_][\w\d_:-]*[\w\d_]', l)
         for k in m: keys.add(k[1:])
     return keys.difference(ids(page))
+
+def _getrootflag(argv: list):
+    """
+    Extract the root flag from argv and return either
+    the specified root directory as string or None. Note
+    that this function will modify argv by removing the
+    '--root' flag and the corresponding value if they are
+    found. Also note that this function will throw an
+    IndexError if the '--root' flag is specified but
+    the value is missing.
+    """
+    rootdir = None
+    i = 0
+    while i < len(argv):
+        if argv[i] == '--root':
+            rootdir = argv[i+1]
+            argv.pop(i); argv.pop(i)
+        elif argv[i].startswith('--root='):
+            rootdir = argv[i][7:]
+            argv.pop(i)
+        i += 1
+    return rootdir
+def _findrootdir():
+    """
+    Locate the jotter root directory by checking all
+    parent directories. Returns either the jotter root
+    directory as string or None.
+    """
+    ds = os.getcwd().split('/')
+    while ds:
+        if os.path.isdir('/'.join(ds + ['.jotter'])):
+            return '/'.join(ds)
+        ds.pop()
+def cd_to_root():
+    """
+    Change the directory to the jotter root directory,
+    respecting the --root option if it is specified in
+    argv. Note that this function modifies sys.argv by
+    removing the root option if it is found and processed.
+    Also note that this function calls exit(1) if the root
+    directory is not found.
+    """
+    try:
+        root = _getrootflag(sys.argv)
+    except IndexError:
+        print('The --root option is missing its value', file=sys.stderr)
+        exit(1)
+    if root == None: root = _findrootdir()
+    if root == None:
+        print('Unable to locate jotter root dir', file=sys.stderr)
+        exit(1)
+    os.chdir(root)

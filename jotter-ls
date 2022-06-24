@@ -5,7 +5,7 @@ from fnmatch import fnmatchcase
 from jotter import *
 
 _cli_help = """
-Usage: jotter-ls [-h] [KEY|GLOB]...
+Usage: jotter-ls [-h|--root DIR] [KEY|GLOB]...
 
 Print a list of all keys in the jotter. These keys can be filtered by
 specifying a number of KEYs that shall be included, by specifying one
@@ -16,6 +16,7 @@ if __name__ == "__main__":
     if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
         print(_cli_help)
         exit(0)
+    cd_to_root()
     qs = sys.argv[1:]
     keys = set()
     for f in fd():

@@ -63,7 +63,7 @@ def hubs() -> list[tuple[str,int]]:
     return sorted(citecounts.items(), key=lambda x: -x[1])
 
 _cli_help = """
-Usage: jotter-get [-h] [INFO]
+Usage: jotter-get [-h|--root DIR] [INFO]
 
 Get a certain piece of information about the graph constituted
 by the linked notes. INFO may be any of the following:
@@ -94,6 +94,7 @@ if __name__ == "__main__":
     if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
         print(_cli_help)
         exit(0)
+    cd_to_root()
     if len(sys.argv) < 2:
         print('jotter-get takes at least one argument', file=sys.stderr)
         exit(1)

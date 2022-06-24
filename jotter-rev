@@ -5,21 +5,20 @@ from fnmatch import fnmatchcase
 from jotter import *
 
 _cli_help = """
-Usage: jotter-rev <KEY|GLOB>...
+Usage: jotter-rev [-h|--root DIR] <KEY|GLOB>...
 
 Reverse lookup of citekeys. That is, find all notes that link to
 a certain KEY. Specifying multiple KEYs is possible by providing
 multiple arguments, by specifying a shell-like GLOB that matches
 one or more keys, or by using a combination of both.
 
-Options:
-    -h  --help      Print this help message and exit
 """.lstrip()
 
 if __name__ == "__main__":
     if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
         print(_cli_help)
         exit(0)
+    cd_to_root()
     qs = sys.argv[1:]
     if not qs:
         print('At least one KEY or GLOB needs to be specified',
