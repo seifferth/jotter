@@ -40,27 +40,7 @@ These metadata blocks are the basis for jotter's functionality. Currently,
 jotter handles the following variables which can be specified in such
 yaml-blocks:
 
-- keywords
 - bibtex
-
-### Keywords
-
-You can specify lists of keywords to describe the content of markdown
-files. The syntax is as follows:
-
-```
----
-keywords:
-  - free software
-  - commandline
-  - personal wiki
----
-```
-
-These keywords can be searched or listed using the `jotter-keyword`
-command described below. If jotter encounters more than one list of
-keywords, it computes the union of all keywords found in any of the
-lists.
 
 ### Bibtex
 
@@ -117,10 +97,6 @@ jotter
 jotter-bib
 : Extract bibtex entries from all markdown files in the jotter and combine
 them in a single file.
-
-jotter-keyword
-: Interact with keywords specified throughout the wiki.
-See `jotter-keyword -h` for further information.
 
 jotter-tags
 : Create a `tags` file in the current working directory. This file is meant

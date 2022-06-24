@@ -18,8 +18,6 @@ Commands
                 all notes that link to a certain entry)
     get         Get certain pieces of information about the graph
                 constituted by the linked notes
-    keyword     Search files that contain certain keywords in
-                yaml blocks
 
 EOF
 elif test "$(which jotter-$1 2>/dev/null)"; then
