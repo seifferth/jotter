@@ -29,6 +29,7 @@ words="$(fd -e md|xargs cat|wc -w)"
 lines="$(fd -e md|xargs cat|wc -l)"
 
 cat <<EOF
+Root:         $(pwd)
 Notes:        $(jotter-get --root . notes|wc -l)
 References:   $(jotter-bib --stdout --root .|grep '^[ \t]*@'|wc -l)
 Files:        $(fd -e md|wc -l)
