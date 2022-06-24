@@ -19,7 +19,6 @@ lines="$(fd -e md|xargs cat|wc -l)"
 cat <<EOF
 Notes:        $(jotter-get notes|wc -l)
 References:   $(jotter-bib|grep '^[ \t]*@'|wc -l)
-Keywords:     $(jotter-keyword -l|wc -l)
 Files:        $(fd -e md|wc -l)
 Words:        $words
 Lines:        $lines
