@@ -82,10 +82,10 @@ by the linked notes. INFO may be any of the following:
                 one another, excluding hermit notes.
   missing       Get a list of notes that are referenced but do not
                 exist. I. e., the targets of broken links.
-  hubs [-n N]   The 10 notes with the highest number of outgoing
+  hubs [-n N]   The 20 notes with the highest number of outgoing
                 links. Only one id is reported per node. The -n
                 option may be used to select a different number
-                than 10.
+                than 20.
   cites <KEY>   Print the citations found in the note with the
                 specified KEY.
 """.lstrip()
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         if len(sys.argv) >= 3 and sys.argv[2].startswith('-n'):
             if sys.argv[2] == '-n': nhubs = int(sys.argv[3])
             else: nhubs = int(sys.argv[2][2:])
-        else: nhubs = 10
+        else: nhubs = 20
         printvalued(hubs()[:nhubs] if nhubs >= 0 else hubs(),
                     sortkey=lambda x: (-x[1], x[0]),
                     vformat='{} links')
