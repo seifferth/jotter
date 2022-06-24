@@ -65,29 +65,29 @@ def hubs() -> list[tuple[str,int]]:
 _cli_help = """
 Usage: jotter-get [-h|--root DIR] [INFO]
 
-Get a certain piece of information about the graph constituted
-by the linked notes. INFO may be any of the following:
+Get a certain piece of information about the graph constituted by the
+linked notes. INFO may be any of the following:
 
-  notes         Get a list containing all keys used in this jotter,
-                excluding missing notes.
-  dups          A list of duplicate ids that are used more than
-                once in this jotter.
-  roots         Notes with no incoming links from other notes,
-                excluding hermit notes.
-  leafs         Notes with no outgoing links to other notes,
-                excluding hermit notes.
-  hermits       Notes with neither incoming nor outgoing links
-                to other notes.
-  graphs        A summary of subgraphs that have no links between
-                one another, excluding hermit notes.
-  missing       Get a list of notes that are referenced but do not
-                exist. I. e., the targets of broken links.
-  hubs [-n N]   The 20 notes with the highest number of outgoing
-                links. Only one id is reported per node. The -n
-                option may be used to select a different number
-                than 20.
-  cites <KEY>   Print the citations found in the note with the
-                specified KEY.
+  notes           Get a list containing all keys used in this jotter,
+                  excluding missing notes.
+  dups            A list of duplicate ids that are used more than
+                  once in this jotter.
+  roots           Notes with no incoming links from other notes,
+                  excluding hermit notes.
+  leafs           Notes with no outgoing links to other notes,
+                  excluding hermit notes.
+  hermits         Notes with neither incoming nor outgoing links
+                  to other notes.
+  graphs [-n N]   A summary of subgraphs that have no links between
+                  one another, excluding hermit notes.
+  missing         Get a list of notes that are referenced but do not
+                  exist. I. e., the targets of broken links.
+  hubs [-n N]     The 20 notes with the highest number of outgoing
+                  links. Only one id is reported per node. The -n
+                  option may be used to select a different number
+                  than 20.
+  cites <KEY>     Print the citations found in the note with the
+                  specified KEY.
 """.lstrip()
 
 if __name__ == "__main__":
@@ -98,6 +98,12 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print('jotter-get takes at least one argument', file=sys.stderr)
         exit(1)
+    def parse_nflag(default):
+        if len(sys.argv) >= 3 and sys.argv[2].startswith('-n'):
+            if sys.argv[2] == '-n':
+                return int(sys.argv[3])
+            return int(sys.argv[2][2:])
+        return default
     def printsorted(keys: set):
         for k in sorted(keys):
             print(f'- @{k}')
@@ -118,6 +124,7 @@ if __name__ == "__main__":
     elif info == 'leafs':       printsorted(leafs())
     elif info == 'hermits':     printsorted(hermits())
     elif info == 'graphs':
+        num_nodes = parse_nflag(default=2)
         def graphdesc(max_i, i, notes, roots, leafs, missing):
             frame = '* Graph {:>'+str(len(str(max_i)))+'}  '\
                     '[{} note{}, {} missing, {} root{}, {} leaf{}]'
@@ -129,15 +136,20 @@ if __name__ == "__main__":
                 leafs, 's' if leafs != 1 else '',
             )
         def printsome(nodetype: str, nodes: list) -> None:
-            if len(nodes) == 0: return
+            if len(nodes) == 0 or num_nodes == 0: return
             elif len(nodes) == 1:
                 print(f'    + {nodetype}: @{nodes[0]}')
-            elif len(nodes) < 3:
+            elif num_nodes > 0 and len(nodes) < num_nodes+1:
                 print(f'    + {nodetype}s:', ', '.join(
                                         (f'@{k}' for k in nodes)))
             else:
-                print(f'    + {nodetype}s: @{nodes[0]}, @{nodes[1]}, '\
-                      f'... [{len(nodes)-2} more]')
+                suffix = ''
+                if num_nodes >= 0:
+                    suffix = f', ... [{len(nodes)-num_nodes} more]'
+                    nodes = nodes[:num_nodes+1]
+                print(f'    + {nodetype}s: ' +
+                      ', '.join((f'@{k}' for k in nodes)) +
+                      suffix)
         gs = graphs()
         rs = roots()
         ls = leafs()
@@ -158,10 +170,7 @@ if __name__ == "__main__":
             if i < len(gs): print()
     elif info == 'missing':     printsorted(missing())
     elif info == 'hubs':
-        if len(sys.argv) >= 3 and sys.argv[2].startswith('-n'):
-            if sys.argv[2] == '-n': nhubs = int(sys.argv[3])
-            else: nhubs = int(sys.argv[2][2:])
-        else: nhubs = 20
+        nhubs = parse_nflag(default=20)
         printvalued(hubs()[:nhubs] if nhubs >= 0 else hubs(),
                     sortkey=lambda x: (x[1], x[0]),
                     vformat='{} links')
