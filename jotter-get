@@ -146,8 +146,8 @@ if __name__ == "__main__":
             g_roots = g.intersection(rs)
             g_leafs = g.intersection(ls)
             g_missing = g.intersection(ms)
-            print(graphdesc(len(gs), i, len(g), len(g_roots),
-                            len(g_leafs), len(g_missing)))
+            print(graphdesc(len(gs), i, len(g) - len(g_missing),
+                            len(g_roots), len(g_leafs), len(g_missing)))
             printsome('root', sorted(g_roots))
             printsome('leaf', sorted(g_leafs))
             notelabel = 'note' if len(g_roots)+len(g_leafs) == 0 \
