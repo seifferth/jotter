@@ -153,7 +153,7 @@ if __name__ == "__main__":
                 suffix = ''
                 if num_nodes >= 0:
                     suffix = f', ... [{len(nodes)-num_nodes} more]'
-                    nodes = nodes[:num_nodes+1]
+                    nodes = nodes[:num_nodes]
                 printlistitem(f'{nodetype}s: ' +
                               ', '.join((f'@{k}' for k in nodes)) +
                               suffix)
