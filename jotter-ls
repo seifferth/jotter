@@ -3,27 +3,44 @@
 import sys
 from fnmatch import fnmatchcase
 from jotter import *
+from getopt import gnu_getopt as getopt
 
 _cli_help = """
-Usage: jotter-ls [-h|--root DIR] [KEY|GLOB]...
+Usage: jotter-ls [OPTION]... [KEY|GLOB]...
 
 Print a list of all keys in the jotter. These keys can be filtered by
 specifying a number of KEYs that shall be included, by specifying one
 or more GLOBs that match certain keys, or using a combination of both.
+
+Options:
+
+  --root DIR        Use DIR as the jotter root directory.
+  -a, --all         Include all keys in the search. The default behaviour
+                    is to ignore missing notes and thus to only consider
+                    keys that actually lead to a note.
+  -h, --help        Print this help message and exit.
 """.lstrip()
 
 if __name__ == "__main__":
-    if '-h' in sys.argv[1:] or '--help' in sys.argv[1:]:
-        print(_cli_help)
-        exit(0)
     cd_to_root()
-    qs = sys.argv[1:]
+    opts, qs = getopt(sys.argv[1:], 'ah', ['all', 'help'])
+    print_all = False
+    for k, v in opts:
+        if k == '-h' or k == '--help':
+            print(_cli_help)
+            exit(0)
+        elif k == '-a' or k == '--all':
+            print_all = True
     keys = set()
     for f in fd():
         for p in pages(f):
             p_ids = ids(p)
             for k in p_ids:
                 keys.add(k)
+            if print_all:
+                p_cites = cites(p)
+                for k in p_cites:
+                    keys.add(k)
     def printkey(key):
         print(f'- @{key}')
     for k in sorted(keys):
