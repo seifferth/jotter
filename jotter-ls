@@ -22,15 +22,17 @@ Options:
 """.lstrip()
 
 if __name__ == "__main__":
-    cd_to_root()
-    opts, qs = getopt(sys.argv[1:], 'ah', ['all', 'help'])
-    print_all = False
+    opts, qs = getopt(sys.argv[1:], 'ah', ['all', 'help', 'root='])
+    print_all = False; root_dir = None
     for k, v in opts:
         if k == '-h' or k == '--help':
             print(_cli_help)
             exit(0)
         elif k == '-a' or k == '--all':
             print_all = True
+        elif k == '--root':
+            root_dir = v
+    cd_to_root(root=root_dir)
     keys = set()
     for f in fd():
         for p in pages(f):

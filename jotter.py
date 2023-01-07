@@ -97,7 +97,7 @@ def _findrootdir():
         if os.path.isdir('/'.join(ds + ['.jotter'])):
             return '/'.join(ds)
         ds.pop()
-def cd_to_root():
+def cd_to_root(root: str=0):
     """
     Change the directory to the jotter root directory,
     respecting the --root option if it is specified in
@@ -105,12 +105,22 @@ def cd_to_root():
     removing the root option if it is found and processed.
     Also note that this function calls exit(1) if the root
     directory is not found.
+
+    The optional keyword argument 'root' can be used to
+    pass a value obtained from previous argument parsing.
+    If this argument is set to any string or to None, this
+    function will not mess with sys.argv. If 'root' is set
+    to the integer 0 (the default value), this function will
+    try to extract the '--root' flag from sys.argv itself,
+    removing the flag and its argument from sys.argv if it
+    is found.
     """
-    try:
-        root = _getrootflag(sys.argv)
-    except IndexError:
-        print('The --root option is missing its value', file=sys.stderr)
-        exit(1)
+    if root == 0:
+        try:
+            root = _getrootflag(sys.argv)
+        except IndexError:
+            print('The --root option is missing its value', file=sys.stderr)
+            exit(1)
     if root == None: root = _findrootdir()
     if root == None:
         print('Unable to locate jotter root dir', file=sys.stderr)
