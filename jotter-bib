@@ -15,6 +15,9 @@ EOF
 to_outfile() {
     if test "$use_stdout" = 0; then cat >references.bib; else cat; fi
 }
+get_files() {
+    fd -HILt d '\.jotter' | sed 's,^,./,;s/\.jotter$//' | xargs fd -ILe md .
+}
 
 use_stdout=0
 jotter_root=''
@@ -47,7 +50,7 @@ cat <<EOF | to_outfile
 
 EOF
 
-fd -I -e md |
+get_files |
     xargs cat |
     awk '
         ablock == 0 && bblock == 0 && /^```/    { ablock = 1; next }

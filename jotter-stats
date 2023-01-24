@@ -9,6 +9,9 @@ Usage: jotter-stats [-h|--help] [--root DIR]
 EOF
 exit 0
 fi
+get_files() {
+    fd -HILt d '\.jotter' | sed 's,^,./,;s/\.jotter$//' | xargs fd -ILe md .
+}
 
 if test "$1" = "--root"; then
     cd "$2"; shift 2
@@ -25,14 +28,14 @@ else
     done
 fi
 
-words="$(fd -e md|xargs cat|wc -w)"
-lines="$(fd -e md|xargs cat|wc -l)"
+words="$(get_files|xargs cat|wc -w)"
+lines="$(get_files|xargs cat|wc -l)"
 
 cat <<EOF
 Root:         $(pwd)
 Notes:        $(jotter-get --root . notes|wc -l)
 References:   $(jotter-bib --stdout --root .|grep '^[ \t]*@'|wc -l)
-Files:        $(fd -e md|wc -l)
+Files:        $(get_files|wc -l)
 Words:        $words
 Lines:        $lines
 Pages:        $((words/perpage))

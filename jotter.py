@@ -4,8 +4,11 @@ import re, os, sys
 from fnmatch import fnmatchcase
 
 def fd():
-    for d, _, fs in os.walk('.'):
-        if '/.' in d: continue      # Ignore files in hidden directories
+    for d, _, fs in os.walk('.', followlinks=True):
+        if '/.' in d and [ part for part in re.findall(r'/(\.[^/]*)', d)
+             if part != '.jotter' ]:
+            continue        # Ignore files in hidden directories, except
+                            # for linked jotters
         for f in fs:
             if f.startswith('.'): continue      # Ignore hidden files
             if not f.endswith('.md'): continue

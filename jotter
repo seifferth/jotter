@@ -16,6 +16,7 @@ initialized jotter.
 Commands
     init        Initialize a new jotter by marking a certain
                 directory as the jotter's root dir
+    ln          Link a different jotter into this one
     bib         Extract bibliographic information from files
     tags        Create a ctags-like 'tags' file with citekeys
                 as identifiers

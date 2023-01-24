@@ -11,6 +11,10 @@ EOF
 exit 0
 fi
 
+get_files() {
+    fd -HILt d '\.jotter' | sed 's,^,./,;s/\.jotter$//' | xargs fd -ILe md .
+}
+
 if test "$1" = "--root"; then
     cd "$2"; shift 2
 else
@@ -61,4 +65,4 @@ awk '
             next
         }
 
-    ' $(fd -I -e md) | sort > tags
+    ' $(get_files) | sort > tags
