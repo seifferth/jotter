@@ -24,6 +24,16 @@ exit 0
 fi
 
 list_links() {
+    while true; do
+        if test -d .jotter; then
+            break
+        elif test "$(pwd)" = "/"; then
+            echo "No jotter root found" >&2
+            exit 1
+        else
+            cd ..
+        fi
+    done
     fd -HILt d '\.jotter'|xargs fd -t l .|xargs ls -l|cut -d' ' -f9-
 }
 
