@@ -3,12 +3,53 @@
 import re, os, sys
 from fnmatch import fnmatchcase
 
-def fd():
-    for d, _, fs in os.walk('.', followlinks=True):
-        if '/.' in d and [ part for part in re.findall(r'/(\.[^/]*)', d)
-             if part != '.jotter' ]:
-            continue        # Ignore files in hidden directories, except
-                            # for linked jotters
+class JotterConfigException(Exception):
+    pass
+class JotterConfig():
+    def __init__(self, filename):
+        self.jotter_version = '0'   # The only supported version for now
+        self.links = list()
+        if filename != None: self.read(filename)
+    def read(self, filename: str):
+        with open(filename) as f:
+            self.read_file(f)
+    def read_file(self, f):
+        jotter_version = None
+        for l in f:
+            line = l.strip().split(maxsplit=1)
+            if not line: continue
+            if line[0].startswith('#'): continue
+            if len(line) != 2:
+                raise JotterConfigException(f'Config line too short: {l}')
+            # Actual parsing of key-value directives
+            if line[0] == 'jotter_version':
+                jotter_version = line[1]
+            elif line[0] == 'link':
+                self.links.append(line[1])
+            else:
+                raise JotterConfigException(f'Unknown config key: {line[0]}')
+        # Final assertions
+        if jotter_version == None: raise JotterConfigException(
+                                    'Config file contains no jotter version')
+        elif jotter_version != '0': raise JotterConfigException(
+                             f'Unsupported jotter version: {jotter_version}')
+    def write(self, filename: str):
+        with open(filename, 'w') as f:
+            self.write_file(f)
+    def write_file(self, f):
+        f.write(f'jotter_version  {self.jotter_version}\n\n')
+        for link in self.links:
+            f.write(f'link    {link}\n')
+
+def fd(root='.', processed=[]):
+    config = JotterConfig(f'{root}/.jotter/config')
+    for link in config.links:
+        if link in processed: continue      # Prevent infinite recursions
+        processed.append(link)
+        for result in fd(root=link, processed=processed):
+            yield result
+    for d, _, fs in os.walk(root, followlinks=True):
+        if '/.' in d: continue      # Ignore files in hidden directories, except
         for f in fs:
             if f.startswith('.'): continue      # Ignore hidden files
             if not f.endswith('.md'): continue
@@ -89,7 +130,7 @@ def _getrootflag(argv: list):
             argv.pop(i)
         i += 1
     return rootdir
-def _findrootdir():
+def findrootdir():
     """
     Locate the jotter root directory by checking all
     parent directories. Returns either the jotter root
@@ -124,7 +165,7 @@ def cd_to_root(root: str=0):
         except IndexError:
             print('The --root option is missing its value', file=sys.stderr)
             exit(1)
-    if root == None: root = _findrootdir()
+    if root == None: root = findrootdir()
     if root == None:
         print('Unable to locate jotter root dir', file=sys.stderr)
         exit(1)

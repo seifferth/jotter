@@ -14,8 +14,13 @@ EOF
 exit 0
 fi
 
+get_links() {
+    cat .jotter/config | grep '^[ \t]*link[ \t]*' |
+        sed 's,^[ \t]*link[ \t]*,,'
+}
 get_files() {
-    fd -HILt d '\.jotter' | sed 's,^,./,;s/\.jotter$//' | xargs fd -ILe md .
+    get_links | while read link; do fd -ILe md . "$link"; done
+    fd -ILe md
 }
 
 if test "$1" = "--root"; then
@@ -33,10 +38,7 @@ else
     done
 fi
 
-for d in .jotter/*; do
-    test -L "$d" || continue
-    (cd "$d"; jotter tags)
-done
+get_links | while read link; do (cd "$link"; jotter tags); done
 
 awk '
         ablock == 0 && bblock == 0 && /^```/    { ablock = 1; next }

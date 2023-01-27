@@ -1,8 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env python3
 
-if test "$1" = "-h" || test "$1" = "--help"; then
-cat <<EOF
-Usage: jotter-ln [-r|-f|-c] REMOTE [LOCAL]
+import sys, os
+from jotter import *
+from getopt import gnu_getopt as getopt
+
+_cli_help = """
+Usage: jotter-ln [-i|-r] REMOTE [LOCAL]
    Or: jotter-ln -l
 
 Link a remote jotter into a local one. Note that remote, in this case,
@@ -10,115 +13,76 @@ means located in a different directory. It does not mean located on a
 different machine as it would with git, for instance.
 
 Options
+  -i, --init      Initialize a new LOCAL jotter if it does not exist.
+                  In order to use the --init option, it is mandatory
+                  to specify the LOCAL path explicitly.
   -r, --remove    Remove an existing link, rather than creating
                   a new one.
-  -f, --force     Force creating the link, even if the remote jotter
-                  has already been linked. In case the remote jotter
-                  had previously been linked using a different path,
-                  the path will be updated.
-  -c, --create    Initialize a new LOCAL jotter if it does not exist.
   -l, --list      List links found in this jotter.
+  -h, --help      Print this help message and exit.
+""".lstrip()
 
-EOF
-exit 0
-fi
-
-list_links() {
-    while true; do
-        if test -d .jotter; then
-            break
-        elif test "$(pwd)" = "/"; then
-            echo "No jotter root found" >&2
-            exit 1
-        else
-            cd ..
-        fi
-    done
-    fd -HILt d '\.jotter'|xargs fd -t l .|xargs ls -l|cut -d' ' -f9-
-}
-
-jotter_root=''; remove=0; force=0; create=0
-while test "$#" -gt 0; do
-    case "$1" in
-        -h|--help)      print_help; exit 0;;
-        -r|--remove)    remove=1; shift;;
-        -f|--force)     force=1; shift;;
-        -c|--create)    create=1; shift;;
-        -l|--list)      list_links; exit 0;;
-        *)              break;;
-    esac
-done
-if test "$remove" = 1 && test "$force" = 1; then
-    echo "Incompatible options --force and --remove" >&2
-    exit 1
-fi
-if test "$#" -gt 2; then
-    echo "Too many command line arguments: '$@'" >&2
-    exit 1
-elif test "$#" = 0; then
-    echo "Too few arguments" >&2
-    exit 1
-elif test "$#" = 2; then
-    if test "$create" = 1 && ! test -f "$2/.jotter/id"; then
-        jotter-init "$2" || exit 1
-    elif ! test -d "$2"; then
-        echo "No such directory: '$2'" >&2
-        exit 1
-    elif ! test -f "$2/.jotter/id"; then
-        echo "Directory '$2' does not seem to be a jotter root directory" >&2
-        exit 1
-    fi
-    cd "$2"
-elif test "$#" = 1; then
-    origin="$(pwd)"
-    while true; do
-        if test -f .jotter/id; then
-            break
-        elif test "$(pwd)" = "/"; then
-            if test "$create" = 0; then
-                echo "No jotter root found" >&2
-                exit 1
-            else
-                cd "$origin"
-                jotter init .
-                break
-            fi
-        else
-            cd ..
-        fi
-    done
-fi
-if ! test -f .jotter/id; then
-    echo "Something went quite wrong!" >&2
-    exit 5
-fi
-if ! test -f "$1/.jotter/id"; then
-    echo "REMOTE is not a jotter root: '$1'" >&2
-    exit 1
-fi
-
-remote_id="$(cat $1/.jotter/id)"
-if test "$remove" = 0; then
-    if test "$force" = 0 && test -L ".jotter/$remote_id"; then
-        echo "Remote jotter at $1 is already linked into $(pwd)" >&2
-        exit 1
-    else
-        rm -f ".jotter/$remote_id"      # Ensure that the link does not exist!
-                                        # If it does exists, this might create
-                                        # nested links which slow everything to
-                                        # a crawl.
-        ln -s "$1" ".jotter/$remote_id"
-        echo "Linked remote jotter at $1 into $(pwd)"
-    fi
-elif test "$remove" = 1; then
-    if test -L ".jotter/$remote_id"; then
-        rm ".jotter/$remote_id"
-        echo "Removed link to $1 from $(pwd)"
-    else
-        echo "Remote jotter at $1 is not linked into $(pwd)" >&2
-        exit 1
-    fi
-else
-    echo "Something went quite wrong!" >&2
-    exit 5
-fi
+if __name__ == "__main__":
+    opts, args = getopt(sys.argv[1:], 'irlh', ['init', 'remove', 'list',
+                        'help'])
+    short2long = { '-i': 'init', '-r': 'remove', '-l': 'list', '-h': 'help' }
+    opts = { k[2:] if k.startswith('--') else short2long[k]: v
+             for k, v in opts }
+    if 'help' in opts:
+        print(_cli_help); exit(0)
+    elif 'list' in opts:
+        if len(opts.keys()) > 1:
+            print('The --list option cannot be combined with other options',
+                  file=sys.stderr)
+            exit(1)
+        elif args:
+            print('The --list option cannot be combined with further ' \
+                  'arguments', file=sys.stderr)
+            exit(1)
+        rootdir = findrootdir()
+        if rootdir == None:
+            print('Unable to locate jotter root directory', file=sys.stderr)
+            exit(1)
+        os.chdir(rootdir)
+        config = JotterConfig('.jotter/config')
+        for link in config.links: print(link)
+    else:
+        if 'init' in opts and 'remove' in opts:
+            print('The --init and --remove options cannot be combined',
+                  file=sys.stderr)
+            exit(1)
+        if len(args) < 1 or len(args) > 2:
+            print('Wrong number of positional arguments: expected either ' \
+                  f'1 or 2, found {len(args)}', file=sys.stderr)
+            exit(1)
+        remote, local, *_ = args + [None]
+        if remote.endswith('/'): remote = remote.rstrip('/')
+        rootdir = local if local != None else findrootdir()
+        if rootdir == None:
+            print('Unable to locate jotter root directory', file=sys.stderr)
+            exit(1)
+        elif os.path.isfile('.jotter/config'):
+            os.chdir(rootdir)
+            config = JotterConfig('.jotter/config')
+        elif 'init' in opts:
+            os.chdir(rootdir)
+            os.makedirs('.jotter')
+            config = JotterConfig(None)
+        else:
+            print('Unable to locate jotter configuration file',
+                  file=sys.stderr)
+            exit(1)
+        if 'remove' in opts:
+            if remote not in config.links:
+                print(f'Remote {remote} is not linked into this jotter',
+                      file=sys.stderr)
+                exit(1)
+            config.links.remove(remote)
+            config.write('.jotter/config')
+        else:
+            if remote in config.links:
+                print(f'Remote {remote} is already linked into this jotter',
+                      file=sys.stderr)
+                exit(1)
+            config.links.append(remote)
+            config.write('.jotter/config')

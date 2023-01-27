@@ -26,5 +26,7 @@ cd "$origin"
 
 test "$#" -gt 1 && mkdir -p "$1" && cd "$1"
 mkdir .jotter
-uuidgen >.jotter/id
+cat <<EOF >.jotter/config
+jotter_version  0
+EOF
 echo "Initialized new jotter in $(pwd)"

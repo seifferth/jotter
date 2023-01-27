@@ -15,8 +15,13 @@ EOF
 to_outfile() {
     if test "$use_stdout" = 0; then cat >references.bib; else cat; fi
 }
+get_links() {
+    cat .jotter/config | grep '^[ \t]*link[ \t]*' |
+        sed 's,^[ \t]*link[ \t]*,,'
+}
 get_files() {
-    fd -HILt d '\.jotter' | sed 's,^,./,;s/\.jotter$//' | xargs fd -ILe md .
+    get_links | while read link; do fd -ILe md . "$link"; done
+    fd -ILe md
 }
 
 use_stdout=0
