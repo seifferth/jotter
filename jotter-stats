@@ -42,8 +42,8 @@ Words:        $words
 Lines:        $lines
 Pages:        $((words/perpage))
 
-Linked Jotters:     $(get_links|wc -l)
-$(get_links | sed 's,^,  - ,')
+Linked Jotters:     $(get_links|wc -l)$(get_links|
+                                        sed 's,^,  - ,'|sed -z 's,^,\n,')
 Reachable Notes:    $(jotter-get --root . notes|wc -l)
 Bibtex Entries:     $(jotter-bib --stdout --root .|grep '^[ \t]*@'|wc -l)
 
