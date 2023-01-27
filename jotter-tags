@@ -5,7 +5,10 @@ cat <<EOF
 Usage: jotter-tags [-h|--help] [--root DIR]
 
 Write a ctags-like tags file with file references to bibliography
-declarations.
+declarations. If remote jotters are linked into the local one, this
+command will recursively create tags files for all those linked jotters.
+This ensures that text editors always get the most recent information,
+regardless of which tags file they use to locate a reference.
 
 EOF
 exit 0
@@ -29,6 +32,11 @@ else
         fi
     done
 fi
+
+for d in .jotter/*; do
+    test -L "$d" || continue
+    (cd "$d"; jotter tags)
+done
 
 awk '
         ablock == 0 && bblock == 0 && /^```/    { ablock = 1; next }
