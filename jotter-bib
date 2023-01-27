@@ -20,7 +20,9 @@ get_links() {
         sed 's,^[ \t]*link[ \t]*,,'
 }
 get_files() {
-    get_links | while read link; do fd -ILe md . "$link"; done
+    get_links | while read link; do
+        (cd "$link"; get_files | sed "s,^\([^/~]\),$link/\1,")
+    done
     fd -ILe md
 }
 
