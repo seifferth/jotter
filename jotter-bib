@@ -13,6 +13,8 @@ them to standard output instead.
 EOF
 }
 to_outfile() {
+    # Note that this function must only be used once, since it overrides
+    # references.bib when writing to file.
     if test "$use_stdout" = 0; then cat >references.bib; else cat; fi
 }
 get_links() {
@@ -49,13 +51,6 @@ else
         fi
     done
 fi
-
-cat <<EOF | to_outfile
-% Composite Bibliography
-% Jotter
-% $(date -R)
-
-EOF
 
 get_files |
     xargs cat |
