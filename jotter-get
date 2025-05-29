@@ -147,7 +147,7 @@ if __name__ == "__main__":
             elif len(nodes) == 1:
                 printlistitem(f'{nodetype}: @{nodes[0]}')
             elif num_nodes > 0 and len(nodes) < num_nodes+1:
-                printlistitem(f'{nodetype}s:' + ', '.join(
+                printlistitem(f'{nodetype}s: ' + ', '.join(
                                         (f'@{k}' for k in nodes)))
             else:
                 suffix = ''
